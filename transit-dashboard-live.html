@@ -26,7 +26,9 @@
   .setup-notice .dismiss{font-size:10px;color:var(--text-dim);cursor:pointer;margin-top:6px;display:inline-block;text-decoration:underline;}
 
   .header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;flex-shrink:0;position:relative;z-index:1;opacity:0;animation:fadeUp 0.5s 0.1s ease forwards;}
-  .eyebrow{font-size:10px;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-secondary);margin-bottom:5px;}
+  .eyebrow-row{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
+  .eyebrow{font-size:10px;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-secondary);}
+  .live-badge{display:inline-flex;align-items:center;gap:5px;font-size:9px;font-weight:600;letter-spacing:0.12em;color:var(--text-dim);}
   .title{font-size:26px;font-weight:300;letter-spacing:-0.02em;line-height:1;}
   .clock{font-family:'DM Mono',monospace;font-size:30px;font-weight:400;letter-spacing:-0.02em;text-align:right;line-height:1;}
   .date-line{font-size:11px;color:var(--text-secondary);margin-top:4px;text-align:right;}
@@ -37,6 +39,7 @@
   .stop-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-left:1px;}
   .stop-pip{width:5px;height:5px;border-radius:50%;background:var(--text-dim);flex-shrink:0;}
   .stop-name{font-size:10px;font-weight:600;letter-spacing:0.11em;text-transform:uppercase;color:var(--text-secondary);}
+  .stop-dir{font-size:9px;font-weight:500;letter-spacing:0.04em;color:var(--text-dim);}
   .stop-walk{font-size:10px;color:var(--text-dim);margin-left:auto;}
   .cards{display:flex;flex-direction:column;gap:2px;}
   .loading-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 18px;font-size:12px;color:var(--text-dim);display:flex;align-items:center;gap:10px;}
@@ -64,11 +67,6 @@
   .dep-mins{font-family:'DM Mono',monospace;font-size:26px;font-weight:500;line-height:1;letter-spacing:-0.03em;}
   .dep-mins.red{color:var(--red);}.dep-mins.orange{color:var(--orange);}.dep-mins.yellow{color:var(--yellow);}.dep-mins.green{color:var(--green);}.dep-mins.white{color:var(--text-primary);}
   .dep-unit{font-size:10px;color:var(--text-secondary);margin-bottom:1px;}
-  .occ{display:flex;align-items:center;gap:4px;}
-  .occ-dots{display:flex;gap:3px;}
-  .occ-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.07);}
-  .occ-dot.g{background:var(--green);border-color:var(--green);}.occ-dot.y{background:var(--yellow);border-color:var(--yellow);}.occ-dot.r{background:var(--red);border-color:var(--red);}
-  .occ-label{font-size:9px;color:var(--text-dim);font-family:'DM Mono',monospace;}
   .dep-chips{display:flex;gap:4px;}
   .chip{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-dim);background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:5px;padding:2px 6px;}
   .route-map-outer{margin-top:2px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:12px;padding:12px 14px;animation:fadeUp 0.25s ease forwards;}
@@ -78,12 +76,15 @@
   .map-stop{display:flex;flex-direction:column;align-items:center;flex-shrink:0;}
   .map-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.18);}
   .map-stop.passed .map-dot{background:rgba(255,255,255,0.32);border-color:rgba(255,255,255,0.32);}
-  .map-stop.current .map-dot{width:10px;height:10px;background:var(--tram);border-color:var(--tram);box-shadow:0 0 8px rgba(79,142,247,0.55);}
+  .map-stop.current .map-dot{width:10px;height:10px;background:var(--tram);border-color:var(--tram);animation:dotGlow 1.6s ease-in-out infinite;}
   .map-stop.yours .map-dot{border-color:rgba(255,255,255,0.5);}
   .map-stop-name{font-size:8px;color:var(--text-dim);margin-top:5px;text-align:center;max-width:48px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .map-stop.current .map-stop-name{color:var(--tram);font-weight:600;}.map-stop.yours .map-stop-name{color:var(--text-secondary);font-weight:500;}
   .map-line{height:1.5px;flex:1;min-width:16px;background:rgba(255,255,255,0.08);margin-bottom:14px;flex-shrink:0;}
-  .map-line.passed{background:rgba(255,255,255,0.3);}.map-line.active{background:linear-gradient(90deg,rgba(255,255,255,0.3),var(--tram));}
+  .map-line.passed{background:rgba(255,255,255,0.3);}
+  .map-line.active{background:linear-gradient(90deg,var(--tram),rgba(255,255,255,0.08));background-size:200% 100%;animation:lineFlow 1.4s linear infinite;}
+  @keyframes dotGlow{0%,100%{box-shadow:0 0 6px rgba(79,142,247,0.5);}50%{box-shadow:0 0 16px rgba(79,142,247,1);}}
+  @keyframes lineFlow{from{background-position:200% 0;}to{background-position:-200% 0;}}
   .divider{height:1px;background:var(--border);margin:0 0 18px;flex-shrink:0;position:relative;z-index:1;}
   .status{display:flex;align-items:center;justify-content:space-between;padding-top:14px;border-top:1px solid var(--border);margin-top:auto;flex-shrink:0;position:relative;z-index:1;opacity:0;animation:fadeUp 0.5s 0.35s ease forwards;}
   .status-left{display:flex;align-items:center;gap:7px;}
@@ -113,7 +114,10 @@
 
   <div class="header">
     <div class="header-left">
-      <div class="eyebrow">Dresden · DVB · Live</div>
+      <div class="eyebrow-row">
+        <span class="eyebrow">Dresden · DVB · Live</span>
+        <span class="live-badge"><span class="pulse loading" id="pulse-dot-top"></span>LIVE</span>
+      </div>
       <div class="title">Live Departures</div>
     </div>
     <div class="header-right">
@@ -123,17 +127,17 @@
   </div>
   <div class="banner" id="banner"><span>🌙</span><span id="banner-text"></span></div>
   <div class="stop-section">
-    <div class="stop-header"><div class="stop-pip"></div><div class="stop-name">Weißeritzstraße</div><div class="stop-walk">~1 min · front door</div></div>
+    <div class="stop-header"><div class="stop-pip"></div><div class="stop-name">Weißeritzstraße</div><div class="stop-dir">towards Prager Straße</div><div class="stop-walk">~3 min · front door</div></div>
     <div class="cards" id="stop-weiseritz"><div class="loading-card"><div class="spinner"></div>Fetching live data…</div></div>
   </div>
   <div class="divider"></div>
   <div class="stop-section">
-    <div class="stop-header"><div class="stop-pip"></div><div class="stop-name">Kongresszentrum</div><div class="stop-walk">~4 min walk</div></div>
+    <div class="stop-header"><div class="stop-pip"></div><div class="stop-name">Kongresszentrum</div><div class="stop-dir">towards Tukwila</div><div class="stop-walk">~4 min walk</div></div>
     <div class="cards" id="stop-kongress"><div class="loading-card"><div class="spinner"></div>Fetching live data…</div></div>
   </div>
   <div class="divider"></div>
   <div class="stop-section">
-    <div class="stop-header"><div class="stop-pip"></div><div class="stop-name">Bahnhof Mitte</div><div class="stop-walk">~2 min walk</div></div>
+    <div class="stop-header"><div class="stop-pip"></div><div class="stop-name">Bahnhof Mitte</div><div class="stop-dir">towards Postplatz</div><div class="stop-walk">~2 min walk</div></div>
     <div class="cards" id="stop-mitte"><div class="loading-card"><div class="spinner"></div>Fetching live data…</div></div>
   </div>
   <div class="status">
@@ -145,7 +149,7 @@
 <script>
 // ── Stop config (verified IDs from DVB website) ───────────────────
 const STOPS = {
-  weiseritz: { id: '33000149', lines: ['10','68'], walk: 1, cid: 'stop-weiseritz' },
+  weiseritz: { id: '33000149', lines: ['10','68'], walk: 3, cid: 'stop-weiseritz' },
   kongress:  { id: '33000021', lines: ['6','11'],  walk: 4, cid: 'stop-kongress'  },
   mitte:     { id: '33000001', lines: ['1','2'],   walk: 2, cid: 'stop-mitte'     },
 };
@@ -241,7 +245,6 @@ function parseDeps(data, lines) {
       type: d.Mot === 'Tram' ? 'tram' : 'bus',
       platform: d.Platform ? `Steig ${d.Platform.Name}` : '',
       minsAway: mins, delay,
-      occupancy: d.Occupancy || 'Unknown',
     };
 
     (grouped[d.LineName] ||= []).push(entry);
@@ -276,18 +279,11 @@ function urgency(dep, walk) {
   return                { label:'Plenty of time',             cls:'comfortable', col:'white'  };
 }
 
-function occData(l) {
-  if (l==='StandingOnly') return{filled:2,cls:'y',label:'Standing'};
-  if (l==='Full')         return{filled:3,cls:'r',label:'Very full'};
-  if (l==='ManySeats')    return{filled:1,cls:'g',label:'Seats avail.'};
-  return                        {filled:0,cls:'', label:''};
-}
-
 function buildMap(line, minsAway) {
   const def = ROUTE_MAPS[line]; if (!def) return '';
   const { stops, yours } = def;
   const tramAt = Math.max(0, yours - Math.min(3, Math.floor(minsAway / 3)));
-  let html = '<div class="route-map-outer"><div class="map-label">Live Position · tap to close</div><div class="map-track">';
+  let html = '<div class="route-map-outer"><div class="map-label">Live Position</div><div class="map-track">';
   stops.forEach((s,i) => {
     const cls = i===tramAt?'current':i===yours?'yours':i<tramAt?'passed':'';
     if(i>0){const lc=i<=tramAt?'passed':i===tramAt+1?'active':'';html+=`<div class="map-line ${lc}"></div>`;}
@@ -300,13 +296,10 @@ function render(cid, deps, walk) {
   const el = document.getElementById(cid);
   el.innerHTML = '';
   if (!deps.length) { el.innerHTML='<div class="loading-card">No departures for this stop right now</div>'; return; }
-  deps.forEach((dep, idx) => {
+  deps.forEach((dep) => {
     const u = urgency(dep.minsAway, walk);
-    const occ = occData(dep.occupancy);
     const display = dep.minsAway < 0.4 ? '—' : Math.round(dep.minsAway);
     const unit = dep.minsAway < 0.4 ? '' : 'min';
-    const mapId = `map-${cid}-${idx}`;
-    const dots = [0,1,2].map(i=>`<div class="occ-dot ${i<occ.filled?occ.cls:''}"></div>`).join('');
     const card = document.createElement('div');
     card.className = `card${dep.delay>0?' delayed':''}`;
     card.innerHTML = `
@@ -322,17 +315,16 @@ function render(cid, deps, walk) {
       </div>
       <div class="dep">
         <div class="dep-num"><span class="dep-mins ${u.col}">${display}</span><span class="dep-unit">${unit}</span></div>
-        <div class="occ"><div class="occ-dots">${dots}</div><span class="occ-label">${occ.label}</span></div>
         ${dep.next.length?`<div class="dep-chips">${dep.next.map(m=>`<span class="chip">${m}m</span>`).join('')}</div>`:''}
       </div>`;
-    card.addEventListener('click', () => {
-      const ex = document.getElementById(mapId);
-      if(ex){ex.remove();return;}
-      document.querySelectorAll('.route-map-outer').forEach(e=>e.remove());
-      const d=document.createElement('div');d.id=mapId;d.innerHTML=buildMap(dep.line,dep.minsAway);
-      card.after(d.firstChild);
-    });
     el.appendChild(card);
+
+    const mapHtml = buildMap(dep.line, dep.minsAway);
+    if (mapHtml) {
+      const wrap = document.createElement('div');
+      wrap.innerHTML = mapHtml;
+      el.appendChild(wrap.firstChild);
+    }
   });
 }
 
@@ -358,14 +350,17 @@ async function fetchAll() {
   document.getElementById('updated').textContent = `${p(now.getHours())}:${p(now.getMinutes())}`;
 
   const dot = document.getElementById('pulse-dot');
+  const dotTop = document.getElementById('pulse-dot-top');
   const txt = document.getElementById('status-text');
   if (anyOk) {
     dot.className = 'pulse';
+    dotTop.className = 'pulse';
     txt.textContent = `Live · DVB API · Proxy ${workingProxyIdx} · Refreshes every 30s`;
     // Hide setup notice once it's working
     document.getElementById('setup-notice').style.display = 'none';
   } else {
     dot.className = 'pulse error';
+    dotTop.className = 'pulse error';
     txt.textContent = 'All proxies blocked — run python3 server (see above)';
   }
 
