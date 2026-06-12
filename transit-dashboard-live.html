@@ -26,9 +26,7 @@
   .setup-notice .dismiss{font-size:10px;color:var(--text-dim);cursor:pointer;margin-top:6px;display:inline-block;text-decoration:underline;}
 
   .header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;flex-shrink:0;position:relative;z-index:1;opacity:0;animation:fadeUp 0.5s 0.1s ease forwards;}
-  .eyebrow-row{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
-  .eyebrow{font-size:10px;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-secondary);}
-  .live-badge{display:inline-flex;align-items:center;gap:5px;font-size:9px;font-weight:600;letter-spacing:0.12em;color:var(--text-dim);}
+  .eyebrow{font-size:10px;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-secondary);margin-bottom:5px;}
   .title{font-size:26px;font-weight:300;letter-spacing:-0.02em;line-height:1;}
   .clock{font-family:'DM Mono',monospace;font-size:30px;font-weight:400;letter-spacing:-0.02em;text-align:right;line-height:1;}
   .date-line{font-size:11px;color:var(--text-secondary);margin-top:4px;text-align:right;}
@@ -98,10 +96,7 @@
 
   <div class="header">
     <div class="header-left">
-      <div class="eyebrow-row">
-        <span class="eyebrow">Dresden · DVB · Live</span>
-        <span class="live-badge"><span class="pulse loading" id="pulse-dot-top"></span>LIVE</span>
-      </div>
+      <div class="eyebrow">Dresden · DVB · Live</div>
       <div class="title">Live Departures</div>
     </div>
     <div class="header-right">
@@ -305,17 +300,14 @@ async function fetchAll() {
   document.getElementById('updated').textContent = `${p(now.getHours())}:${p(now.getMinutes())}`;
 
   const dot = document.getElementById('pulse-dot');
-  const dotTop = document.getElementById('pulse-dot-top');
   const txt = document.getElementById('status-text');
   if (anyOk) {
     dot.className = 'pulse';
-    dotTop.className = 'pulse';
-    txt.textContent = `Live · DVB API · Proxy ${workingProxyIdx} · Refreshes every 30s`;
+    txt.textContent = `Live · DVB API · Proxy ${workingProxyIdx} · Refreshes every 10s`;
     // Hide setup notice once it's working
     document.getElementById('setup-notice').style.display = 'none';
   } else {
     dot.className = 'pulse error';
-    dotTop.className = 'pulse error';
     txt.textContent = 'All proxies blocked — run python3 server (see above)';
   }
 
@@ -346,7 +338,7 @@ if (localStorage.getItem('setup-dismissed')) {
 
 setInterval(tick, 1000); tick();
 fetchAll();
-setInterval(fetchAll, 30000);
+setInterval(fetchAll, 10000);
 </script>
 </body>
 </html>
