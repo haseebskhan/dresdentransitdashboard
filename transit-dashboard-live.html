@@ -43,7 +43,7 @@
   .loading-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 18px;font-size:12px;color:var(--text-dim);display:flex;align-items:center;gap:10px;}
   .spinner{width:13px;height:13px;border:2px solid rgba(255,255,255,0.1);border-top-color:var(--tram);border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0;}
   .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;display:grid;grid-template-columns:42px 1fr auto;align-items:center;gap:12px;cursor:pointer;transition:background 0.18s,border-color 0.18s;}
-  .card:hover{background:var(--surface-hover);border-color:var(--border-bright);}.card.delayed{border-color:rgba(255,184,48,0.18);}
+  .card:hover{background:var(--surface-hover);border-color:var(--border-bright);}
   .badge{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:14px;font-weight:500;flex-shrink:0;}
   .badge.tram{background:rgba(79,142,247,0.11);color:var(--tram);border:1px solid rgba(79,142,247,0.2);}
   .badge.bus{background:rgba(167,139,250,0.11);color:var(--bus);border:1px solid rgba(167,139,250,0.2);}
@@ -51,7 +51,6 @@
   .mid-top{display:flex;align-items:center;gap:6px;margin-bottom:3px;flex-wrap:wrap;}
   .type-label{font-size:9px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-dim);}
   .platform-pill{font-family:'DM Mono',monospace;font-size:9px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);color:var(--text-secondary);border-radius:4px;padding:1px 5px;}
-  .delay-pill{font-size:9px;font-weight:600;background:rgba(255,184,48,0.1);border:1px solid rgba(255,184,48,0.2);color:var(--amber);border-radius:4px;padding:1px 6px;}
   .dest{font-size:15px;font-weight:400;letter-spacing:-0.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:5px;}
   .urgency{font-size:9px;font-weight:600;letter-spacing:0.04em;padding:2px 7px;border-radius:5px;display:inline-block;}
   .urgency.gone{background:rgba(255,79,79,0.11);color:var(--red);border:1px solid rgba(255,79,79,0.2);}
@@ -205,16 +204,14 @@ function parseDeps(data, lines) {
   const now = new Date();
 
   data.Departures.filter(d => lines.includes(String(d.LineName).trim())).forEach(d => {
-    const sched = parseDate(d.ScheduledTime);
-    const real  = d.RealTime ? parseDate(d.RealTime) : sched;
-    const mins  = (real - now) / 60000;
-    const delay = Math.max(0, Math.round((real - sched) / 60000));
+    const real = d.RealTime ? parseDate(d.RealTime) : parseDate(d.ScheduledTime);
+    const mins = (real - now) / 60000;
 
     const entry = {
       line: d.LineName, dest: d.Direction,
       type: d.Mot === 'Tram' ? 'tram' : 'bus',
       platform: d.Platform ? `Steig ${d.Platform.Name}` : '',
-      minsAway: mins, delay,
+      minsAway: mins,
     };
 
     (grouped[d.LineName] ||= []).push(entry);
@@ -258,14 +255,13 @@ function render(cid, deps, walk) {
     const display = dep.minsAway < 0.4 ? '—' : Math.round(dep.minsAway);
     const unit = dep.minsAway < 0.4 ? '' : 'min';
     const card = document.createElement('div');
-    card.className = `card${dep.delay>0?' delayed':''}`;
+    card.className = 'card';
     card.innerHTML = `
       <div class="badge ${dep.type}">${dep.line}</div>
       <div class="mid">
         <div class="mid-top">
           <span class="type-label">${dep.type==='tram'?'Tram':'Bus'}</span>
           ${dep.platform?`<span class="platform-pill">${dep.platform}</span>`:''}
-          ${dep.delay>0?`<span class="delay-pill">+${dep.delay} min</span>`:''}
         </div>
         <div class="dest">${dep.dest}</div>
         <span class="urgency ${u.cls}">${u.label}</span>
@@ -303,7 +299,7 @@ async function fetchAll() {
   const txt = document.getElementById('status-text');
   if (anyOk) {
     dot.className = 'pulse';
-    txt.textContent = `Live · DVB API · Proxy ${workingProxyIdx} · Refreshes every 10s`;
+    txt.textContent = `Live · DVB API · Proxy ${workingProxyIdx} · Refreshes every 20s`;
     // Hide setup notice once it's working
     document.getElementById('setup-notice').style.display = 'none';
   } else {
@@ -338,7 +334,7 @@ if (localStorage.getItem('setup-dismissed')) {
 
 setInterval(tick, 1000); tick();
 fetchAll();
-setInterval(fetchAll, 10000);
+setInterval(fetchAll, 20000);
 </script>
 </body>
 </html>
