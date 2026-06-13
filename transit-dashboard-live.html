@@ -334,14 +334,31 @@ function urgency(dep, walk) {
   return                { label:'Plenty of time',             cls:'comfortable', col:'white'  };
 }
 
-function buildMap(line, minsAway) {
+function buildMap(line, dest, minsAway) {
   const def = ROUTE_MAPS[line]; if (!def) return '';
   const { stops, yours } = def;
-  const tramAt = Math.max(0, yours - Math.min(3, Math.floor(minsAway / 3)));
+  const lastIdx = stops.length - 1;
+
+  // Figure out which direction the tram is travelling along this route
+  // based on its destination, so the live-position dot moves the right way.
+  let reverse;
+  if (dest.includes(stops[0])) reverse = true;
+  else if (dest.includes(stops[lastIdx])) reverse = false;
+  else return ''; // destination doesn't match either end of this route — don't guess
+
+  const delta = Math.min(3, Math.floor(minsAway / 3));
+  const tramAt = reverse ? Math.min(lastIdx, yours + delta) : Math.max(0, yours - delta);
+
   let html = '<div class="route-map-outer"><div class="map-label">Live Position</div><div class="map-track">';
   stops.forEach((s,i) => {
-    const cls = i===tramAt?'current':i===yours?'yours':i<tramAt?'passed':'';
-    if(i>0){const lc=i<=tramAt?'passed':i===tramAt+1?'active':'';html+=`<div class="map-line ${lc}"></div>`;}
+    const isPassed = reverse ? i > tramAt : i < tramAt;
+    const cls = i===tramAt?'current':i===yours?'yours':isPassed?'passed':'';
+    if(i>0){
+      const lc = reverse
+        ? (i>tramAt?'passed':i===tramAt?'active':'')
+        : (i<=tramAt?'passed':i===tramAt+1?'active':'');
+      html+=`<div class="map-line ${lc}"></div>`;
+    }
     html+=`<div class="map-stop ${cls}"><div class="map-dot"></div><div class="map-stop-name">${i===yours?'📍 '+s:s}</div></div>`;
   });
   return html+'</div></div>';
@@ -373,7 +390,7 @@ function render(cid, deps, walk) {
         ${dep.next.length?`<div class="dep-chips">${dep.next.map(m=>`<span class="chip">${m}m</span>`).join('')}</div>`:''}
       </div>`;
 
-    const mapHtml = buildMap(dep.line, dep.minsAway);
+    const mapHtml = buildMap(dep.line, dep.dest, dep.minsAway);
     if (mapHtml) {
       card.addEventListener('click', () => {
         const ex = document.getElementById(mapId);
