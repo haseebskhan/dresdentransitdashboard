@@ -180,7 +180,7 @@ const STOPS = {
   kongress:   { id: '33000021', lines: ['6','11'],  walk: 7, cid: 'stop-kongress'   },
   mitte:      { id: '33000001', lines: ['1','2'],   walk: 6, cid: 'stop-mitte'      },
   // Same stop as "mitte", but only trams heading towards Cottaer Straße
-  cottaer:    { id: '33000001', lines: 'all', mot: ['Tram'], direction: 'Cottaer Straße', walk: 6, cid: 'stop-cottaer' },
+  cottaer:    { id: '33000001', lines: 'all', mot: ['Tram'], direction: ['Wölfnitz','Gorbitz'], walk: 6, cid: 'stop-cottaer' },
   // Same stop as "mitte" — all trams/buses/S-Bahn/RE heading towards Freiberger Straße
   freiberger: { id: '33000001', lines: 'all', direction: 'Freiberger Straße', walk: 6, cid: 'stop-freiberger' },
 };
@@ -270,7 +270,10 @@ function parseDeps(data, lines, opts = {}) {
   data.Departures.filter(d => {
     if (lines !== 'all' && !lines.includes(String(d.LineName).trim())) return false;
     if (opts.mot && !opts.mot.includes(d.Mot)) return false;
-    if (opts.direction && !String(d.Direction).includes(opts.direction)) return false;
+    if (opts.direction) {
+      const dirs = Array.isArray(opts.direction) ? opts.direction : [opts.direction];
+      if (!dirs.some(dir => String(d.Direction).includes(dir))) return false;
+    }
     if (opts.platform) {
       const t = d.Mot === 'Tram' ? 'tram' : d.Mot === 'SuburbanRailway' ? 'sbahn' : d.Mot === 'Train' ? 'train' : 'bus';
       const want = opts.platform[t];
