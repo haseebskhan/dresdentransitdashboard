@@ -139,7 +139,7 @@
   </div>
   <div class="divider"></div>
   <div class="stop-section">
-    <div class="stop-header"><div class="stop-pip"></div><div class="stop-name">Dresden S-Bf. Freiberger Straße</div><div class="stop-dir">towards Fitx</div><div class="stop-walk">~6 min walk</div></div>
+    <div class="stop-header"><div class="stop-pip"></div><div class="stop-name">Bahnhof Mitte</div><div class="stop-dir">towards Fitx</div><div class="stop-walk">~6 min walk</div></div>
     <div class="cards" id="stop-freiberger"><div class="loading-card"><div class="spinner"></div>Fetching live data…</div></div>
   </div>
   <div class="status">
@@ -164,9 +164,8 @@ const STOPS = {
   mitte:      { id: '33000001', lines: ['1','2'],   walk: 6, cid: 'stop-mitte'      },
   // Same stop as "mitte", but only trams heading towards Cottaer Straße
   cottaer:    { id: '33000001', lines: 'all', mot: ['Tram'], direction: 'Cottaer Straße', walk: 6, cid: 'stop-cottaer' },
-  // All trams/buses/S-Bahn/RE trains at Dresden S-Bf. Freiberger Straße
-  // TODO: verify this stop ID (use #find on the live page)
-  freiberger: { id: '33000013', lines: 'all', walk: 6, cid: 'stop-freiberger' },
+  // Same stop as "mitte" — all trams/buses/S-Bahn/RE heading towards Freiberger Straße
+  freiberger: { id: '33000001', lines: 'all', direction: 'Freiberger Straße', walk: 6, cid: 'stop-freiberger' },
 };
 
 // ── CORS proxy cascade — tries each in order until one works ──────
