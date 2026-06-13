@@ -175,7 +175,8 @@
 <script>
 // ── Stop config (verified IDs from DVB website) ───────────────────
 const STOPS = {
-  weiseritz:  { id: '33000149', lines: ['10','68'], walk: 3, cid: 'stop-weiseritz'  },
+  // Only platform 1 trams and platform 3 buses
+  weiseritz:  { id: '33000149', lines: ['10','68'], platform: { tram: '1', bus: '3' }, walk: 3, cid: 'stop-weiseritz'  },
   kongress:   { id: '33000021', lines: ['6','11'],  walk: 7, cid: 'stop-kongress'   },
   mitte:      { id: '33000001', lines: ['1','2'],   walk: 6, cid: 'stop-mitte'      },
   // Same stop as "mitte", but only trams heading towards Cottaer Straße
@@ -270,6 +271,11 @@ function parseDeps(data, lines, opts = {}) {
     if (lines !== 'all' && !lines.includes(String(d.LineName).trim())) return false;
     if (opts.mot && !opts.mot.includes(d.Mot)) return false;
     if (opts.direction && !String(d.Direction).includes(opts.direction)) return false;
+    if (opts.platform) {
+      const t = d.Mot === 'Tram' ? 'tram' : d.Mot === 'SuburbanRailway' ? 'sbahn' : d.Mot === 'Train' ? 'train' : 'bus';
+      const want = opts.platform[t];
+      if (want && (!d.Platform || String(d.Platform.Name) !== String(want))) return false;
+    }
     return true;
   }).forEach(d => {
     const real = d.RealTime ? parseDate(d.RealTime) : parseDate(d.ScheduledTime);
@@ -386,10 +392,10 @@ function render(cid, deps, walk) {
 async function fetchAll() {
   let anyOk = false;
 
-  await Promise.all(Object.values(STOPS).map(async ({ id, lines, walk, cid, mot, direction }) => {
+  await Promise.all(Object.values(STOPS).map(async ({ id, lines, walk, cid, mot, direction, platform }) => {
     try {
       const data = await dvbPost(id);
-      const deps = parseDeps(data, lines, { mot, direction });
+      const deps = parseDeps(data, lines, { mot, direction, platform });
       render(cid, deps, walk);
       anyOk = true;
     } catch(e) {
