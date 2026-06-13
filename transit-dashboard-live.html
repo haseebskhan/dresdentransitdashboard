@@ -44,8 +44,8 @@
   .stop-section{flex-shrink:0;margin-bottom:18px;position:relative;z-index:1;opacity:0;animation:fadeUp 0.5s ease forwards;}
   .stop-section:nth-child(4){animation-delay:0.1s;}.stop-section:nth-child(5){animation-delay:0.18s;}.stop-section:nth-child(6){animation-delay:0.26s;}
   .stop-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-left:1px;}
-  .stop-pip{width:5px;height:5px;border-radius:50%;background:var(--text-dim);flex-shrink:0;}
-  .stop-name{font-size:10px;font-weight:600;letter-spacing:0.11em;text-transform:uppercase;color:var(--text-secondary);}
+  .stop-pip{width:5px;height:5px;border-radius:50%;background:var(--tram);flex-shrink:0;}
+  .stop-name{font-size:10px;font-weight:600;letter-spacing:0.11em;text-transform:uppercase;color:var(--tram);}
   .stop-dir{font-size:9px;font-weight:500;letter-spacing:0.04em;color:var(--text-dim);}
   .stop-walk{font-size:10px;color:var(--text-dim);margin-left:auto;}
   .cards{display:flex;flex-direction:column;gap:2px;}
@@ -56,6 +56,8 @@
   .badge{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:14px;font-weight:500;flex-shrink:0;}
   .badge.tram{background:rgba(79,142,247,0.11);color:var(--tram);border:1px solid rgba(79,142,247,0.2);}
   .badge.bus{background:rgba(167,139,250,0.11);color:var(--bus);border:1px solid rgba(167,139,250,0.2);}
+  .badge.sbahn{background:rgba(46,204,113,0.11);color:var(--green);border:1px solid rgba(46,204,113,0.2);}
+  .badge.train{background:rgba(255,150,64,0.11);color:var(--orange);border:1px solid rgba(255,150,64,0.2);}
   .mid{min-width:0;}
   .mid-top{display:flex;align-items:center;gap:6px;margin-bottom:3px;flex-wrap:wrap;}
   .type-label{font-size:9px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-dim);}
@@ -130,18 +132,41 @@
     <div class="stop-header"><div class="stop-pip"></div><div class="stop-name">Bahnhof Mitte</div><div class="stop-dir">towards Postplatz</div><div class="stop-walk">~6 min walk</div></div>
     <div class="cards" id="stop-mitte"><div class="loading-card"><div class="spinner"></div>Fetching live data…</div></div>
   </div>
+  <div class="divider"></div>
+  <div class="stop-section">
+    <div class="stop-header"><div class="stop-pip"></div><div class="stop-name">Bahnhof Mitte</div><div class="stop-dir">towards Rahim Kita</div><div class="stop-walk">~6 min walk</div></div>
+    <div class="cards" id="stop-cottaer"><div class="loading-card"><div class="spinner"></div>Fetching live data…</div></div>
+  </div>
+  <div class="divider"></div>
+  <div class="stop-section">
+    <div class="stop-header"><div class="stop-pip"></div><div class="stop-name">Dresden S-Bf. Freiberger Straße</div><div class="stop-dir">towards Fitx</div><div class="stop-walk">~6 min walk</div></div>
+    <div class="cards" id="stop-freiberger"><div class="loading-card"><div class="spinner"></div>Fetching live data…</div></div>
+  </div>
   <div class="status">
     <div class="status-left"><div class="pulse loading" id="pulse-dot"></div><div class="status-text" id="status-text">Connecting to DVB…</div></div>
     <div class="status-time" id="updated">--:--</div>
   </div>
 </div>
 
+<!-- Temporary stop-ID finder: append #find to the URL to use it -->
+<div id="finder" style="display:none;position:fixed;bottom:10px;left:10px;right:10px;max-height:60vh;overflow:auto;background:#111;border:1px solid #333;padding:10px;border-radius:8px;z-index:99;font-size:12px;font-family:'DM Mono',monospace;color:#eee;">
+  <div style="margin-bottom:6px;">Stop ID finder — search by name:</div>
+  <input id="finder-q" placeholder="e.g. Freiberger Straße" style="width:60%;padding:4px;background:#222;color:#eee;border:1px solid #444;">
+  <button onclick="findStop()" style="padding:4px 10px;">Search</button>
+  <pre id="finder-results" style="margin-top:8px;white-space:pre-wrap;"></pre>
+</div>
+
 <script>
 // ── Stop config (verified IDs from DVB website) ───────────────────
 const STOPS = {
-  weiseritz: { id: '33000149', lines: ['10','68'], walk: 3, cid: 'stop-weiseritz' },
-  kongress:  { id: '33000021', lines: ['6','11'],  walk: 7, cid: 'stop-kongress'  },
-  mitte:     { id: '33000001', lines: ['1','2'],   walk: 6, cid: 'stop-mitte'     },
+  weiseritz:  { id: '33000149', lines: ['10','68'], walk: 3, cid: 'stop-weiseritz'  },
+  kongress:   { id: '33000021', lines: ['6','11'],  walk: 7, cid: 'stop-kongress'   },
+  mitte:      { id: '33000001', lines: ['1','2'],   walk: 6, cid: 'stop-mitte'      },
+  // Same stop as "mitte", but only trams heading towards Cottaer Straße
+  cottaer:    { id: '33000001', lines: 'all', mot: ['Tram'], direction: 'Cottaer Straße', walk: 6, cid: 'stop-cottaer' },
+  // All trams/buses/S-Bahn/RE trains at Dresden S-Bf. Freiberger Straße
+  // TODO: verify this stop ID (use #find on the live page)
+  freiberger: { id: '33000013', lines: 'all', walk: 6, cid: 'stop-freiberger' },
 };
 
 // ── CORS proxy cascade — tries each in order until one works ──────
@@ -173,7 +198,7 @@ let workingProxyIdx = 0;
 async function dvbPost(stopId) {
   const body = JSON.stringify({
     stopid: stopId, limit: 20,
-    mot: ['Tram','CityBus','IntercityBus'],
+    mot: ['Tram','CityBus','IntercityBus','SuburbanRailway','Train'],
     format: 'json'
   });
   const ct = 'application/json;charset=UTF-8';
@@ -207,21 +232,32 @@ function parseDate(s) {
   return m ? new Date(parseInt(m[1])) : new Date();
 }
 
-function parseDeps(data, lines) {
+function parseDeps(data, lines, opts = {}) {
   if (!data.Departures) {
     console.warn('No Departures field in response for stop', data.Name || data.Id, data);
     return [];
   }
   const grouped = {};
   const now = new Date();
+  const lineLabel = lines === 'all' ? 'all' : lines.join(',');
 
-  data.Departures.filter(d => lines.includes(String(d.LineName).trim())).forEach(d => {
+  data.Departures.filter(d => {
+    if (lines !== 'all' && !lines.includes(String(d.LineName).trim())) return false;
+    if (opts.mot && !opts.mot.includes(d.Mot)) return false;
+    if (opts.direction && !String(d.Direction).includes(opts.direction)) return false;
+    return true;
+  }).forEach(d => {
     const real = d.RealTime ? parseDate(d.RealTime) : parseDate(d.ScheduledTime);
     const mins = (real - now) / 60000;
 
+    let type = 'bus';
+    if (d.Mot === 'Tram') type = 'tram';
+    else if (d.Mot === 'SuburbanRailway') type = 'sbahn';
+    else if (d.Mot === 'Train' || d.Mot === 'RegionalBus') type = 'train';
+
     const entry = {
       line: d.LineName, dest: d.Direction,
-      type: d.Mot === 'Tram' ? 'tram' : 'bus',
+      type,
       platform: d.Platform ? `Steig ${d.Platform.Name}` : '',
       minsAway: mins,
     };
@@ -239,12 +275,14 @@ function parseDeps(data, lines) {
     return dep;
   });
 
+  result.sort((a, b) => a.minsAway - b.minsAway);
+
   if (!result.length) {
     if (data.Departures.length) {
       const seen = [...new Set(data.Departures.map(d => d.LineName))];
-      console.warn(`No departures matched lines [${lines.join(',')}] for stop ${data.Name || ''}. Lines present in response: [${seen.join(',')}]`);
+      console.warn(`No departures matched lines [${lineLabel}] for stop ${data.Name || ''}. Lines present in response: [${seen.join(',')}]`);
     } else {
-      console.warn(`API returned zero departures for stop ${data.Name || ''} (looking for lines [${lines.join(',')}]).`);
+      console.warn(`API returned zero departures for stop ${data.Name || ''} (looking for lines [${lineLabel}]).`);
     }
   }
   return result;
@@ -276,7 +314,7 @@ function render(cid, deps, walk) {
       <div class="badge ${dep.type}">${dep.line}</div>
       <div class="mid">
         <div class="mid-top">
-          <span class="type-label">${dep.type==='tram'?'Tram':'Bus'}</span>
+          <span class="type-label">${({tram:'Tram',bus:'Bus',sbahn:'S-Bahn',train:'RE'})[dep.type]}</span>
           ${dep.platform?`<span class="platform-pill">${dep.platform}</span>`:''}
         </div>
         <div class="dest">${dep.dest}</div>
@@ -294,10 +332,10 @@ function render(cid, deps, walk) {
 async function fetchAll() {
   let anyOk = false;
 
-  await Promise.all(Object.values(STOPS).map(async ({ id, lines, walk, cid }) => {
+  await Promise.all(Object.values(STOPS).map(async ({ id, lines, walk, cid, mot, direction }) => {
     try {
       const data = await dvbPost(id);
-      const deps = parseDeps(data, lines);
+      const deps = parseDeps(data, lines, { mot, direction });
       render(cid, deps, walk);
       anyOk = true;
     } catch(e) {
@@ -366,6 +404,26 @@ function dismissSetup() {
 // Hide setup notice if already dismissed
 if (localStorage.getItem('setup-dismissed')) {
   document.getElementById('setup-notice').style.display = 'none';
+}
+
+// Temporary stop-ID finder — append #find to the URL to use it
+if (location.hash === '#find') document.getElementById('finder').style.display = 'block';
+async function findStop() {
+  const q = document.getElementById('finder-q').value;
+  const results = document.getElementById('finder-results');
+  results.textContent = 'Searching…';
+  const url = `https://webapi.vvo-online.de/tr/pointfinder?format=json&stopsOnly=true&query=${encodeURIComponent(q)}`;
+  try {
+    const res = await fetch(`https://corsproxy.io/?url=${encodeURIComponent(url)}`);
+    const data = await res.json();
+    const points = (data.Points || []).map(p => {
+      const parts = p.split('|');
+      return { id: parts[0], name: parts[2], type: parts[1] };
+    });
+    results.textContent = JSON.stringify(points, null, 2);
+  } catch (e) {
+    results.textContent = 'Error: ' + e.message;
+  }
 }
 
 setInterval(tick, 1000); tick();
