@@ -342,10 +342,11 @@ function render(cid, deps, walk) {
   const el = document.getElementById(cid);
   el.innerHTML = '';
   if (!deps.length) { el.innerHTML='<div class="loading-card">No departures for this stop right now</div>'; return; }
-  deps.forEach((dep) => {
+  deps.forEach((dep, idx) => {
     const u = urgency(dep.minsAway, walk);
     const display = dep.minsAway < 0.4 ? '—' : Math.round(dep.minsAway);
     const unit = dep.minsAway < 0.4 ? '' : 'min';
+    const mapId = `map-${cid}-${idx}`;
     const card = document.createElement('div');
     card.className = 'card';
     card.innerHTML = `
@@ -362,14 +363,22 @@ function render(cid, deps, walk) {
         <div class="dep-num"><span class="dep-mins ${u.col}">${display}</span><span class="dep-unit">${unit}</span></div>
         ${dep.next.length?`<div class="dep-chips">${dep.next.map(m=>`<span class="chip">${m}m</span>`).join('')}</div>`:''}
       </div>`;
-    el.appendChild(card);
 
     const mapHtml = buildMap(dep.line, dep.minsAway);
     if (mapHtml) {
-      const wrap = document.createElement('div');
-      wrap.innerHTML = mapHtml;
-      el.appendChild(wrap.firstChild);
+      card.addEventListener('click', () => {
+        const ex = document.getElementById(mapId);
+        if (ex) { ex.remove(); fitScreen(); return; }
+        document.querySelectorAll('.route-map-outer').forEach(e => e.remove());
+        const wrap = document.createElement('div');
+        wrap.innerHTML = mapHtml;
+        wrap.firstChild.id = mapId;
+        card.after(wrap.firstChild);
+        fitScreen();
+      });
     }
+
+    el.appendChild(card);
   });
 }
 
