@@ -178,8 +178,8 @@ const STOPS = {
   // Only platform 1 trams and platform 3 buses
   weiseritz:  { id: '33000149', lines: ['10','68'], platform: { tram: '1', bus: '3' }, walk: 3, cid: 'stop-weiseritz'  },
   kongress:   { id: '33000021', lines: ['6','11'],  walk: 7, cid: 'stop-kongress'   },
-  // Towards Postplatz — exclude trams heading the other way (towards Wölfnitz/Gorbitz)
-  mitte:      { id: '33000001', lines: ['1','2'], excludeDirection: ['Wölfnitz','Gorbitz'], walk: 6, cid: 'stop-mitte' },
+  // Towards Postplatz — only trams/buses actually heading that way (1→Prohlis, 2→Kleinzschachwitz, 68→Lübnitzer Höhe)
+  mitte:      { id: '33000001', lines: ['1','2','68'], direction: ['Postplatz','Altmarkt','Pirnaischer','Prohlis','Blasewitz','Kleinzschachwitz','Lübnitzer Höhe'], walk: 6, cid: 'stop-mitte' },
   // Same stop as "mitte", but only trams heading towards Cottaer Straße
   cottaer:    { id: '33000001', lines: 'all', mot: ['Tram'], direction: ['Wölfnitz','Gorbitz'], walk: 6, cid: 'stop-cottaer' },
   // Same stop as "mitte" — all trams/buses/S-Bahn/RE heading towards Freiberger Straße
