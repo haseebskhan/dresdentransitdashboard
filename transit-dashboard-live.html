@@ -225,7 +225,7 @@ let workingProxyIdx = 0;
 
 async function dvbPost(stopId) {
   const body = JSON.stringify({
-    stopid: stopId, limit: 20,
+    stopid: stopId, limit: 60,
     mot: ['Tram','CityBus','IntercityBus','SuburbanRailway','Train'],
     format: 'json'
   });
