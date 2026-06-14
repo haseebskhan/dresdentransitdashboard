@@ -416,6 +416,7 @@ async function fetchAll() {
   await Promise.all(Object.values(STOPS).map(async ({ id, lines, walk, cid, mot, direction, platform }) => {
     try {
       const data = await dvbPost(id);
+      console.log(`[${cid}] stop id ${id} → API name: "${data.Name}" (place: "${data.Place}")`);
       const deps = parseDeps(data, lines, { mot, direction, platform });
       render(cid, deps, walk);
       anyOk = true;
