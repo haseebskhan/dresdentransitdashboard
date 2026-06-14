@@ -497,10 +497,7 @@ async function findStop() {
   try {
     const res = await fetch(`https://corsproxy.io/?url=${encodeURIComponent(url)}`);
     const data = await res.json();
-    const points = (data.Points || []).map(p => {
-      const parts = p.split('|');
-      return { id: parts[0], name: parts[2], type: parts[1] };
-    });
+    const points = (data.Points || []).map(p => p.split('|'));
     results.textContent = JSON.stringify(points, null, 2);
   } catch (e) {
     results.textContent = 'Error: ' + e.message;
