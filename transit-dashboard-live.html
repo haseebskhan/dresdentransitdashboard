@@ -16,12 +16,15 @@
   html,body{width:100%;min-height:100vh;background:var(--bg);color:var(--text-primary);font-family:'DM Sans',sans-serif;}
   .screen{width:min(100vw,calc(100vh * 9/16));min-height:100vh;margin:0 auto;padding:32px 26px 26px;display:flex;flex-direction:column;position:relative;}
 
-  /* Large / desktop screens (e.g. 4K vertical monitors): scale the
-     phone-sized layout up to fill the viewport without scrolling. */
+  /* Large / desktop screens: center the phone-sized layout. On very large
+     displays (e.g. 4K vertical monitors) it's scaled to fill without
+     scrolling; on normal desktop windows it stays natural size and the
+     page scrolls if content is taller than the viewport. */
   @media (min-width: 900px) {
-    html,body{height:100%;overflow:hidden;}
-    body{display:flex;align-items:center;justify-content:center;}
     .screen{width:430px;min-height:auto;height:auto;flex-shrink:0;transform-origin:center center;}
+    body.kiosk{height:100%;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+    body:not(.kiosk){display:block;padding:24px 0;}
+    body:not(.kiosk) .screen{margin:0 auto;}
   }
   .glow-top{position:fixed;top:-20%;left:10%;width:70%;height:50%;background:radial-gradient(ellipse,rgba(79,142,247,0.07) 0%,transparent 65%);pointer-events:none;z-index:0;}
   .glow-bottom{position:fixed;bottom:-20%;right:0;width:60%;height:50%;background:radial-gradient(ellipse,rgba(167,139,250,0.05) 0%,transparent 65%);pointer-events:none;z-index:0;}
@@ -478,13 +481,21 @@ function fitScreen() {
   const screen = document.querySelector('.screen');
   if (window.innerWidth < 900) {
     screen.style.transform = '';
+    document.body.classList.remove('kiosk');
     return;
   }
   screen.style.transform = 'none';
   const naturalW = screen.offsetWidth;
   const naturalH = screen.scrollHeight;
-  const scale = Math.min(window.innerWidth / naturalW, window.innerHeight / naturalH);
-  screen.style.transform = `scale(${scale})`;
+
+  // Only scale-to-fit (no scroll) on very large displays (e.g. 4K kiosk
+  // monitors). Regular desktop browser windows keep natural size and scroll.
+  const isKiosk = window.innerWidth >= 1000 && window.innerHeight >= 1400;
+  document.body.classList.toggle('kiosk', isKiosk);
+  if (isKiosk) {
+    const scale = Math.min(window.innerWidth / naturalW, window.innerHeight / naturalH);
+    screen.style.transform = `scale(${scale})`;
+  }
 }
 window.addEventListener('resize', fitScreen);
 
