@@ -75,7 +75,8 @@
   .dep-mins{font-family:'DM Mono',monospace;font-size:26px;font-weight:500;line-height:1;letter-spacing:-0.03em;}
   .dep-mins.red{color:var(--red);}.dep-mins.orange{color:var(--orange);}.dep-mins.yellow{color:var(--yellow);}.dep-mins.green{color:var(--green);}.dep-mins.white{color:var(--text-primary);}
   .dep-unit{font-size:10px;color:var(--text-secondary);margin-bottom:1px;}
-  .dep-clock{font-family:'DM Mono',monospace;font-size:11px;color:var(--text-dim);text-align:right;margin-top:-2px;}
+  .dep-clock{font-family:'DM Mono',monospace;font-size:11px;text-align:right;margin-top:-2px;opacity:0.75;}
+  .dep-clock.red{color:var(--red);}.dep-clock.orange{color:var(--orange);}.dep-clock.yellow{color:var(--yellow);}.dep-clock.green{color:var(--green);}.dep-clock.white{color:var(--text-primary);}
   .dep-chips{display:flex;gap:4px;}
   .chip{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-dim);background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:5px;padding:2px 6px;}
   .route-map-outer{margin-top:2px;margin-bottom:2px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:12px;padding:12px 14px;animation:fadeUp 0.25s ease forwards;}
@@ -313,7 +314,7 @@ function parseDeps(data, lines, opts = {}) {
     let idx = entries.findIndex(e => e.minsAway >= 0.4);
     if (idx === -1) idx = entries.length - 1;
     const dep = entries[idx];
-    dep.next = entries.slice(idx + 1, idx + 3).map(e => Math.round(e.minsAway));
+    dep.next = entries.slice(idx + 1, idx + 3).map(e => Math.floor(e.minsAway));
     return dep;
   });
 
@@ -378,7 +379,7 @@ function render(cid, deps, walk) {
   if (!deps.length) { el.innerHTML='<div class="loading-card">No departures for this stop right now</div>'; return; }
   deps.forEach((dep, idx) => {
     const u = urgency(dep.minsAway, walk);
-    const display = dep.minsAway < 0.4 ? '—' : Math.round(dep.minsAway);
+    const display = dep.minsAway < 0.4 ? '—' : Math.floor(dep.minsAway);
     const unit = dep.minsAway < 0.4 ? '' : 'min';
     const clock = dep.time.toLocaleTimeString('de-DE', { hour:'2-digit', minute:'2-digit' });
     const mapId = `map-${cid}-${idx}`;
@@ -396,7 +397,7 @@ function render(cid, deps, walk) {
       </div>
       <div class="dep">
         <div class="dep-num"><span class="dep-mins ${u.col}">${display}</span><span class="dep-unit">${unit}</span></div>
-        <div class="dep-clock">${clock}</div>
+        <div class="dep-clock ${u.col}">${clock}</div>
         ${dep.next.length?`<div class="dep-chips">${dep.next.map(m=>`<span class="chip">${m}m</span>`).join('')}</div>`:''}
       </div>`;
 
