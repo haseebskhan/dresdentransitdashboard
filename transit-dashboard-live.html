@@ -242,11 +242,8 @@ async function dvbPost(stopId) {
     ...PROXY_BUILDERS.map((_,i) => i).filter(i => i !== workingProxyIdx)
   ];
 
-  // Bust any caching layers (CORS proxies, CDNs) so we always get live data
-  const bustedDvbUrl = DVB_URL + '?_=' + Date.now();
-
   for (const idx of order) {
-    const { url, opts } = PROXY_BUILDERS[idx](bustedDvbUrl, body, ct);
+    const { url, opts } = PROXY_BUILDERS[idx](DVB_URL, body, ct);
     try {
       const res = await fetch(url, { ...opts, cache: 'no-store', signal: AbortSignal.timeout(8000) });
       if (!res.ok) continue;
