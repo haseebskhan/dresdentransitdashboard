@@ -103,8 +103,10 @@
   .map-line{height:1.5px;flex:1;min-width:16px;background:rgba(255,255,255,0.08);margin-bottom:14px;flex-shrink:0;}
   .map-line.passed{background:rgba(255,255,255,0.3);}
   .map-line.active{background:linear-gradient(90deg,var(--tram),rgba(255,255,255,0.08));background-size:200% 100%;animation:lineFlow 1.4s linear infinite;}
+  .map-line.active.reverse{animation:lineFlowReverse 1.4s linear infinite;}
   @keyframes dotGlow{0%,100%{box-shadow:0 0 6px rgba(79,142,247,0.5);}50%{box-shadow:0 0 16px rgba(79,142,247,1);}}
   @keyframes lineFlow{from{background-position:200% 0;}to{background-position:-200% 0;}}
+  @keyframes lineFlowReverse{from{background-position:-200% 0;}to{background-position:200% 0;}}
   .divider{height:1px;background:var(--border);margin:0 0 18px;flex-shrink:0;position:relative;z-index:1;}
   .status{display:flex;align-items:center;justify-content:space-between;padding-top:14px;border-top:1px solid var(--border);margin-top:auto;flex-shrink:0;position:relative;z-index:1;opacity:0;animation:fadeUp 0.5s 0.35s ease forwards;}
   .status-left{display:flex;align-items:center;gap:7px;}
@@ -375,7 +377,7 @@ function buildMap(line, dest, minsAway) {
     const cls = i===tramAt?'current':i===yours?'yours':isPassed?'passed':'';
     if(i>0){
       const lc = reverse
-        ? (i>tramAt?'passed':i===tramAt?'active':'')
+        ? (i>tramAt?'passed':i===tramAt?'active reverse':'')
         : (i<=tramAt?'passed':i===tramAt+1?'active':'');
       html+=`<div class="map-line ${lc}"></div>`;
     }
