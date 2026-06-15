@@ -128,7 +128,7 @@
   <div class="header">
     <div class="header-left">
       <div class="eyebrow-row">
-        <div class="eyebrow">Dresden · DVB · Live</div>
+        <div class="eyebrow">Dresden · <span id="hard-refresh" style="cursor:pointer;">DVB</span> · Live</div>
         <div class="pulse loading" id="pulse-dot-top"></div>
       </div>
       <div class="title">Live Departures</div>
@@ -501,6 +501,10 @@ function fitScreen() {
   }
 }
 window.addEventListener('resize', fitScreen);
+
+document.getElementById('hard-refresh').addEventListener('click', () => {
+  location.href = location.pathname + '?v=' + Date.now();
+});
 
 function dismissSetup() {
   document.getElementById('setup-notice').style.display = 'none';
