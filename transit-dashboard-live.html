@@ -26,6 +26,13 @@
     body:not(.kiosk){display:block;padding:24px 0;}
     body:not(.kiosk) .screen{margin:0 auto;}
   }
+  /* Pull-to-refresh indicator (mobile) */
+  .ptr-indicator{position:fixed;top:0;left:0;width:100%;display:flex;justify-content:center;align-items:center;height:60px;margin-top:-60px;z-index:50;transition:transform 0.25s cubic-bezier(0.34,1.56,0.64,1),opacity 0.25s ease;opacity:0;pointer-events:none;}
+  .ptr-indicator.visible{opacity:1;}
+  .ptr-spinner{width:26px;height:26px;border-radius:50%;border:2.5px solid var(--border-bright);border-top-color:var(--tram);transform:rotate(0deg);transition:opacity 0.2s ease;}
+  .ptr-spinner.spinning{animation:ptrSpin 0.7s linear infinite;}
+  @keyframes ptrSpin{to{transform:rotate(360deg);}}
+
   .glow-top{position:fixed;top:-20%;left:10%;width:70%;height:50%;background:radial-gradient(ellipse,rgba(79,142,247,0.07) 0%,transparent 65%);pointer-events:none;z-index:0;}
   .glow-bottom{position:fixed;bottom:-20%;right:0;width:60%;height:50%;background:radial-gradient(ellipse,rgba(167,139,250,0.05) 0%,transparent 65%);pointer-events:none;z-index:0;}
 
@@ -113,7 +120,8 @@
 </head>
 <body>
 <div class="glow-top"></div><div class="glow-bottom"></div>
-<div class="screen">
+<div class="ptr-indicator" id="ptr-indicator"><div class="ptr-spinner"></div></div>
+<div class="screen" id="screen">
 
   <!-- One-time setup notice -->
   <div class="setup-notice" id="setup-notice">
@@ -534,6 +542,56 @@ setInterval(tick, 1000); tick();
 fitScreen();
 fetchAll();
 setInterval(fetchAll, 20000);
+
+// ── Pull-to-refresh (mobile) ───────────────────────────────────────
+(() => {
+  const indicator = document.getElementById('ptr-indicator');
+  const spinner = indicator.querySelector('.ptr-spinner');
+  const THRESHOLD = 70;
+  let startY = 0, pulling = false, refreshing = false;
+
+  document.addEventListener('touchstart', e => {
+    if (refreshing || window.scrollY > 0) return;
+    startY = e.touches[0].clientY;
+    pulling = true;
+  }, { passive: true });
+
+  document.addEventListener('touchmove', e => {
+    if (!pulling || refreshing) return;
+    const delta = e.touches[0].clientY - startY;
+    if (delta <= 0) {
+      indicator.classList.remove('visible');
+      indicator.style.transform = '';
+      return;
+    }
+    const pull = Math.min(delta * 0.5, THRESHOLD * 1.4);
+    indicator.classList.add('visible');
+    indicator.style.transform = `translateY(${60 + pull}px)`;
+    spinner.style.transform = `rotate(${pull * 3}deg)`;
+  }, { passive: true });
+
+  document.addEventListener('touchend', e => {
+    if (!pulling || refreshing) { pulling = false; return; }
+    pulling = false;
+    const delta = (e.changedTouches[0].clientY - startY) * 0.5;
+    if (delta >= THRESHOLD) {
+      refreshing = true;
+      indicator.style.transform = `translateY(${60 + THRESHOLD}px)`;
+      spinner.classList.add('spinning');
+      fetchAll().finally(() => {
+        setTimeout(() => {
+          indicator.classList.remove('visible');
+          indicator.style.transform = '';
+          spinner.classList.remove('spinning');
+          refreshing = false;
+        }, 400);
+      });
+    } else {
+      indicator.classList.remove('visible');
+      indicator.style.transform = '';
+    }
+  });
+})();
 </script>
 </body>
 </html>
