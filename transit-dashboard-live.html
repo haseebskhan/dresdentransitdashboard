@@ -580,14 +580,10 @@ setInterval(fetchAll, 20000);
       refreshing = true;
       indicator.style.transform = `translateY(${60 + THRESHOLD}px)`;
       spinner.classList.add('spinning');
-      fetchAll().finally(() => {
-        setTimeout(() => {
-          indicator.classList.remove('visible');
-          indicator.style.transform = '';
-          spinner.classList.remove('spinning');
-          refreshing = false;
-        }, 400);
-      });
+      spinner.classList.add('spinning');
+      setTimeout(() => {
+        location.href = location.pathname + '?v=' + Date.now();
+      }, 300);
     } else {
       indicator.classList.remove('visible');
       indicator.style.transform = '';
