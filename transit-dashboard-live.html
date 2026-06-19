@@ -54,6 +54,7 @@
   .stop-section{flex-shrink:0;margin-bottom:18px;position:relative;z-index:1;opacity:0;animation:fadeUp 0.5s ease forwards;}
   .stop-section:nth-child(4){animation-delay:0.1s;}.stop-section:nth-child(5){animation-delay:0.18s;}.stop-section:nth-child(6){animation-delay:0.26s;}
   .stop-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-left:1px;}
+  .group-label{font-size:9px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-secondary);padding:6px 2px 4px;}
   .stop-pip{width:5px;height:5px;border-radius:50%;background:var(--tram);flex-shrink:0;}
   .stop-name{font-size:10px;font-weight:600;letter-spacing:0.11em;text-transform:uppercase;color:var(--tram);}
   .stop-dir{font-size:10px;font-weight:500;letter-spacing:0.02em;color:rgba(238,238,245,0.6);}
@@ -150,8 +151,11 @@
   </div>
   <div class="banner" id="banner"><span>🌙</span><span id="banner-text"></span></div>
   <div class="stop-section">
-    <div class="stop-header"><div class="stop-pip"></div><div class="stop-name">Weißeritzstraße</div><div class="stop-dir">towards Prager Straße</div><div class="stop-walk">~3 min · front door</div></div>
-    <div class="cards" id="stop-weiseritz"><div class="loading-card"><div class="spinner"></div>Fetching live data…</div></div>
+    <div class="stop-header"><div class="stop-pip"></div><div class="stop-name">Weißeritzstraße</div><div class="stop-dir">~3 min · front door</div></div>
+    <div class="group-label">Towards town</div>
+    <div class="cards" id="stop-weiseritz-town"><div class="loading-card"><div class="spinner"></div>Fetching live data…</div></div>
+    <div class="group-label">Towards Ikea</div>
+    <div class="cards" id="stop-weiseritz-ikea"><div class="loading-card"><div class="spinner"></div>Fetching live data…</div></div>
   </div>
   <div class="divider"></div>
   <div class="stop-section">
@@ -190,8 +194,9 @@
 <script>
 // ── Stop config (verified IDs from DVB website) ───────────────────
 const STOPS = {
-  // Only platform 1 trams and platform 3 buses
-  weiseritz:  { id: '33000149', lines: ['10','68'], platform: { tram: '1', bus: '3' }, walk: 3, cid: 'stop-weiseritz'  },
+  // Platforms 1 & 3 = towards town; 2 & 4 = towards Ikea
+  weiseritz_town: { id: '33000149', lines: 'all', platformNums: ['1','3'], platformTag: 'Towards town', walk: 3, cid: 'stop-weiseritz-town' },
+  weiseritz_ikea: { id: '33000149', lines: 'all', platformNums: ['2','4'], platformTag: 'Towards Ikea', walk: 3, cid: 'stop-weiseritz-ikea' },
   kongress:   { id: '33000021', lines: ['6','11'],  walk: 7, cid: 'stop-kongress'   },
   // Towards Postplatz — only trams/buses actually heading that way (1→Prohlis, 2→Kleinzschachwitz, 68→Lübnitzer Höhe)
   mitte:      { id: '33000001', lines: ['1','2','68'], direction: ['Postplatz','Altmarkt','Pirnaischer','Prohlis','Blasewitz','Kleinzschachwitz','Lübnitzer Höhe'], walk: 6, cid: 'stop-mitte' },
@@ -300,6 +305,9 @@ function parseDeps(data, lines, opts = {}) {
       const want = opts.platform[t];
       if (want && (!d.Platform || String(d.Platform.Name) !== String(want))) return false;
     }
+    if (opts.platformNums) {
+      if (!d.Platform || !opts.platformNums.includes(String(d.Platform.Name))) return false;
+    }
     return true;
   }).forEach(d => {
     const real = d.RealTime ? parseDate(d.RealTime) : parseDate(d.ScheduledTime);
@@ -310,10 +318,11 @@ function parseDeps(data, lines, opts = {}) {
     else if (d.Mot === 'SuburbanRailway') type = 'sbahn';
     else if (d.Mot === 'Train' || d.Mot === 'RegionalBus') type = 'train';
 
+    const platformLabel = opts.platformTag || (d.Platform ? `Steig ${d.Platform.Name}` : '');
     const entry = {
       line: d.LineName, dest: d.Direction,
       type,
-      platform: d.Platform ? `Steig ${d.Platform.Name}` : '',
+      platform: platformLabel,
       minsAway: mins,
       time: real,
     };
@@ -436,11 +445,11 @@ function render(cid, deps, walk) {
 async function fetchAll() {
   let anyOk = false;
 
-  await Promise.all(Object.values(STOPS).map(async ({ id, lines, walk, cid, mot, direction, excludeDirection, platform }) => {
+  await Promise.all(Object.values(STOPS).map(async ({ id, lines, walk, cid, mot, direction, excludeDirection, platform, platformNums, platformTag }) => {
     try {
       const data = await dvbPost(id);
       console.log(`[${cid}] stop id ${id} → API name: "${data.Name}" (place: "${data.Place}")`);
-      const deps = parseDeps(data, lines, { mot, direction, excludeDirection, platform });
+      const deps = parseDeps(data, lines, { mot, direction, excludeDirection, platform, platformNums, platformTag });
       render(cid, deps, walk);
       anyOk = true;
     } catch(e) {
