@@ -318,7 +318,7 @@ function parseDeps(data, lines, opts = {}) {
     else if (d.Mot === 'SuburbanRailway') type = 'sbahn';
     else if (d.Mot === 'Train' || d.Mot === 'RegionalBus') type = 'train';
 
-    const platformLabel = opts.platformTag || (d.Platform ? `Steig ${d.Platform.Name}` : '');
+    const platformLabel = opts.platformTag ? '' : (d.Platform ? `Steig ${d.Platform.Name}` : '');
     const entry = {
       line: d.LineName, dest: d.Direction,
       type,
