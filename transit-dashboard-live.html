@@ -54,6 +54,7 @@
   .stop-section{flex-shrink:0;margin-bottom:18px;position:relative;z-index:1;opacity:0;animation:fadeUp 0.5s ease forwards;}
   .stop-section:nth-child(4){animation-delay:0.1s;}.stop-section:nth-child(5){animation-delay:0.18s;}.stop-section:nth-child(6){animation-delay:0.26s;}
   .stop-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-left:1px;}
+  .group-label{font-size:9px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-secondary);padding:8px 2px 4px;}
   .stop-pip{width:5px;height:5px;border-radius:50%;background:var(--tram);flex-shrink:0;}
   .stop-name{font-size:10px;font-weight:600;letter-spacing:0.11em;text-transform:uppercase;color:var(--tram);}
   .stop-dir{font-size:10px;font-weight:500;letter-spacing:0.02em;color:rgba(238,238,245,0.6);}
@@ -150,8 +151,11 @@
   </div>
   <div class="banner" id="banner"><span>🌙</span><span id="banner-text"></span></div>
   <div class="stop-section">
-    <div class="stop-header"><div class="stop-pip"></div><div class="stop-name">Weißeritzstraße</div><div class="stop-dir">towards Prager Straße</div><div class="stop-walk">~3 min · front door</div></div>
-    <div class="cards" id="stop-weiseritz"><div class="loading-card"><div class="spinner"></div>Fetching live data…</div></div>
+    <div class="stop-header"><div class="stop-pip"></div><div class="stop-name">Weißeritzstraße</div><div class="stop-walk">~3 min · front door</div></div>
+    <div class="group-label">Towards town</div>
+    <div class="cards" id="stop-weiseritz-town"><div class="loading-card"><div class="spinner"></div>Fetching live data…</div></div>
+    <div class="group-label">Towards Ikea</div>
+    <div class="cards" id="stop-weiseritz-ikea"><div class="loading-card"><div class="spinner"></div>Fetching live data…</div></div>
   </div>
   <div class="divider"></div>
   <div class="stop-section">
@@ -190,8 +194,6 @@
 <script>
 // ── Stop config (verified IDs from DVB website) ───────────────────
 const STOPS = {
-  // Only platform 1 trams and platform 3 buses
-  weiseritz:  { id: '33000149', lines: ['10','68'], platform: { tram: '1', bus: '3' }, walk: 3, cid: 'stop-weiseritz'  },
   kongress:   { id: '33000021', lines: ['6','11'],  walk: 7, cid: 'stop-kongress'   },
   // Towards Postplatz — only trams/buses actually heading that way (1→Prohlis, 2→Kleinzschachwitz, 68→Lübnitzer Höhe)
   mitte:      { id: '33000001', lines: ['1','2','68'], direction: ['Postplatz','Altmarkt','Pirnaischer','Prohlis','Blasewitz','Kleinzschachwitz','Lübnitzer Höhe'], walk: 6, cid: 'stop-mitte' },
@@ -435,6 +437,22 @@ function render(cid, deps, walk) {
 // ── Main refresh ──────────────────────────────────────────────────
 async function fetchAll() {
   let anyOk = false;
+
+  // Weißeritzstraße: fetch once, split Departures by platform group
+  try {
+    const wData = await dvbPost('33000149');
+    const split = (nums) => parseDeps(
+      { ...wData, Departures: (wData.Departures || []).filter(d => nums.includes(String(d.Platform?.Name))) },
+      'all', {}
+    );
+    render('stop-weiseritz-town', split(['1','3']), 3);
+    render('stop-weiseritz-ikea',  split(['2','4']), 3);
+    anyOk = true;
+  } catch(e) {
+    ['stop-weiseritz-town','stop-weiseritz-ikea'].forEach(id => {
+      document.getElementById(id).innerHTML = `<div class="loading-card">⚠ ${e.message}</div>`;
+    });
+  }
 
   await Promise.all(Object.values(STOPS).map(async ({ id, lines, walk, cid, mot, direction, excludeDirection, platform }) => {
     try {
