@@ -123,7 +123,7 @@
   /* ── App tabs ─────────────────────────────────────────────────── */
   .page{display:none;flex-direction:column;flex:1;}
   .page.active{display:flex;}
-  .tabbar{display:flex;gap:4px;margin-top:auto;padding-top:12px;border-top:1px solid var(--border);flex-shrink:0;position:relative;z-index:1;}
+  .tabbar{display:flex;gap:4px;margin-top:auto;padding-top:12px;border-top:1px solid var(--border);flex-shrink:0;position:sticky;bottom:0;background:var(--bg);z-index:10;}
   .tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;color:var(--text-dim);font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;letter-spacing:0.03em;padding:6px 4px 2px;cursor:pointer;border-radius:10px;transition:color 0.15s,background 0.15s;}
   .tab-btn .tab-icon{font-size:17px;line-height:1;}
   .tab-btn:hover{background:var(--surface);}
@@ -138,16 +138,25 @@
   .planner-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
   .planner-dot.origin{background:var(--tram);}
   .planner-dot.dest{background:var(--red);border-radius:2px;}
-  .planner-field input{flex:1;min-width:0;background:none;border:none;outline:none;color:var(--text-primary);font-family:'DM Sans',sans-serif;font-size:14px;}
+  .planner-field input{flex:1;min-width:0;background:none;border:none;outline:none;color:var(--text-primary);font-family:'DM Sans',sans-serif;font-size:14px;padding-right:56px;}
   .planner-field input::placeholder{color:var(--text-dim);}
+  .planner-clear{position:absolute;right:44px;top:50%;transform:translateY(-50%);width:22px;height:22px;border-radius:50%;background:var(--surface-hover);border:none;color:var(--text-dim);font-size:12px;display:none;align-items:center;justify-content:center;cursor:pointer;z-index:2;}
+  .planner-field.has-value .planner-clear{display:flex;}
+  .planner-locate{position:absolute;right:44px;top:50%;transform:translateY(-50%);width:26px;height:26px;border-radius:8px;background:var(--surface-hover);border:1px solid var(--border-bright);color:var(--tram);font-size:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;}
+  .planner-locate.loading{animation:pulse 1s infinite;}
+  .planner-field.has-value .planner-locate{display:none;}
   .planner-swap{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:30px;height:30px;border-radius:9px;background:var(--surface-hover);border:1px solid var(--border-bright);color:var(--text-secondary);font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;}
-  .planner-suggestions{position:absolute;left:0;right:0;top:calc(100% + 6px);background:#15151d;border:1px solid var(--border-bright);border-radius:12px;padding:6px;z-index:20;max-height:240px;overflow-y:auto;box-shadow:0 12px 32px rgba(0,0,0,0.4);display:none;}
+  .planner-suggestions{position:absolute;left:0;right:0;top:calc(100% + 6px);background:#15151d;border:1px solid var(--border-bright);border-radius:12px;padding:6px;z-index:20;max-height:280px;overflow-y:auto;box-shadow:0 12px 32px rgba(0,0,0,0.4);display:none;}
   .planner-suggestions.visible{display:block;}
   .suggestion{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;cursor:pointer;font-size:13px;}
   .suggestion:hover,.suggestion.active{background:var(--surface-hover);}
   .suggestion-icon{font-size:13px;flex-shrink:0;width:16px;text-align:center;color:var(--text-dim);}
   .suggestion-name{color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .suggestion-city{color:var(--text-dim);font-size:11px;margin-left:auto;padding-left:8px;flex-shrink:0;}
+  .suggestion-group{font-size:9px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-dim);padding:8px 10px 4px;}
+  .suggestion-group:first-child{padding-top:4px;}
+  .suggestion-remove{flex-shrink:0;width:20px;height:20px;border-radius:50%;background:none;border:none;color:var(--text-dim);font-size:11px;display:flex;align-items:center;justify-content:center;}
+  .suggestion-remove:hover{background:var(--surface);color:var(--text-primary);}
   .planner-empty{font-size:11px;color:var(--text-dim);padding:10px 4px;}
   .planner-results{margin-top:16px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;}
   .route-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;cursor:pointer;transition:background 0.18s,border-color 0.18s;}
@@ -241,13 +250,16 @@
     <div class="planner-title">Route Planner</div>
     <div class="planner-form">
       <div class="planner-fields">
-        <div class="planner-field">
+        <div class="planner-field" id="planner-field-from">
           <div class="planner-dot origin"></div>
           <input id="planner-from" type="text" placeholder="From — e.g. Weißeritzstraße" autocomplete="off">
+          <button class="planner-locate" id="planner-locate" title="Use current location">📍</button>
+          <button class="planner-clear" data-field="from" title="Clear">✕</button>
         </div>
-        <div class="planner-field">
+        <div class="planner-field" id="planner-field-to">
           <div class="planner-dot dest"></div>
           <input id="planner-to" type="text" placeholder="To — any stop or address in Dresden" autocomplete="off">
+          <button class="planner-clear" data-field="to" title="Clear">✕</button>
         </div>
       </div>
       <div class="planner-suggestions" id="planner-suggestions"></div>
@@ -652,11 +664,21 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 });
 
 // ── Route planner ────────────────────────────────────────────────
-// Uses the same VVO endpoint family as live departures — pointfinder for
-// place search (stops, addresses, POIs), trips for journey planning.
-// Both send Access-Control-Allow-Origin: * so no proxy is needed here either.
+// Place search blends two free, keyless sources: VVO's own pointfinder
+// (best for stops/POIs it knows about) and OpenStreetMap's Nominatim
+// (much broader address coverage, e.g. house numbers, businesses VVO
+// doesn't index — this is what covers "I can't find this place").
+// Journey planning is VVO's trips endpoint. All three send
+// Access-Control-Allow-Origin: * so none of this needs a proxy.
 const POINTFINDER_URL = 'https://webapi.vvo-online.de/tr/pointfinder';
 const TRIPS_URL = 'https://webapi.vvo-online.de/tr/trips';
+const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search';
+// Rough bounding box around greater Dresden, so a generic query like
+// "Markt" prefers local results over some other German town's.
+const DRESDEN_VIEWBOX = '13.55,51.15,13.95,50.95';
+const HOME_STOP = { id: '33000149', type: '', city: '', name: 'Weißeritzstraße' };
+const RECENTS_KEY = 'planner-recents';
+const MAX_RECENTS = 6;
 
 function parsePoint(raw) {
   const parts = raw.split('|');
@@ -664,7 +686,7 @@ function parsePoint(raw) {
   return { id, type, city, name: name || city || id };
 }
 
-async function searchPlaces(query) {
+async function searchVvo(query) {
   const url = `${POINTFINDER_URL}?format=json&stopsOnly=false&limit=8&query=${encodeURIComponent(query)}`;
   const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
   if (!res.ok) throw new Error(`Search failed (${res.status})`);
@@ -672,22 +694,84 @@ async function searchPlaces(query) {
   return (data.Points || []).map(parsePoint).filter(p => p.name);
 }
 
+async function searchNominatim(query) {
+  const url = `${NOMINATIM_URL}?format=json&q=${encodeURIComponent(query)}&viewbox=${DRESDEN_VIEWBOX}&bounded=1&limit=5&addressdetails=1&accept-language=de`;
+  const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+  if (!res.ok) throw new Error(`Map search failed (${res.status})`);
+  const data = await res.json();
+  return data.map(place => {
+    const a = place.address || {};
+    const name = a.amenity || a.shop || a.building || place.name ||
+      [a.road, a.house_number].filter(Boolean).join(' ') ||
+      place.display_name.split(',')[0];
+    const city = a.city || a.town || a.village || a.suburb || '';
+    return { id: `coord:${place.lon}:${place.lat}:WGS84`, type: 'osm', city, name };
+  }).filter(p => p.name);
+}
+
+// Merge both sources, de-duplicating anything Nominatim found that VVO
+// already returned under a very similar name.
+async function searchPlaces(query) {
+  const [vvo, osm] = await Promise.allSettled([searchVvo(query), searchNominatim(query)]);
+  const vvoPoints = vvo.status === 'fulfilled' ? vvo.value : [];
+  const osmPoints = osm.status === 'fulfilled' ? osm.value : [];
+  const seen = new Set(vvoPoints.map(p => p.name.toLowerCase()));
+  const merged = [...vvoPoints, ...osmPoints.filter(p => !seen.has(p.name.toLowerCase()))];
+  if (!merged.length && vvo.status === 'rejected' && osm.status === 'rejected') {
+    throw new Error(vvo.reason?.message || 'Search failed');
+  }
+  return merged.slice(0, 10);
+}
+
 function placeIcon(p) {
+  if (p.type === 'osm') return '🗺';
   if (p.type === 'p') return '📍';
   if (p.type === 'a') return '🛣';
   return '🚏';
 }
 
+function loadRecents() {
+  try { return JSON.parse(localStorage.getItem(RECENTS_KEY)) || []; } catch { return []; }
+}
+function saveRecent(p) {
+  if (p.type === 'loc') return; // a coordinate snapshot isn't worth remembering
+  const recents = loadRecents().filter(r => r.name !== p.name);
+  recents.unshift(p);
+  try { localStorage.setItem(RECENTS_KEY, JSON.stringify(recents.slice(0, MAX_RECENTS))); } catch {}
+}
+function removeRecent(name) {
+  try { localStorage.setItem(RECENTS_KEY, JSON.stringify(loadRecents().filter(r => r.name !== name))); } catch {}
+}
+
 const plannerState = { from: null, to: null, activeField: null };
 const fromInput = document.getElementById('planner-from');
 const toInput = document.getElementById('planner-to');
+const fromField = document.getElementById('planner-field-from');
+const toField = document.getElementById('planner-field-to');
 const suggestBox = document.getElementById('planner-suggestions');
 let searchToken = 0;
+
+function fieldFor(name) { return name === 'from' ? fromField : toField; }
+function inputFor(name) { return name === 'from' ? fromInput : toInput; }
 
 function closeSuggestions() {
   suggestBox.classList.remove('visible');
   suggestBox.innerHTML = '';
   plannerState.activeField = null;
+}
+
+function positionSuggestions(field) {
+  const fieldEl = fieldFor(field);
+  suggestBox.style.top = `${fieldEl.offsetTop + fieldEl.offsetHeight + 6}px`;
+  suggestBox.classList.add('visible');
+  plannerState.activeField = field;
+}
+
+function suggestionRow(p, { removable } = {}) {
+  const row = document.createElement('div');
+  row.className = 'suggestion';
+  row.innerHTML = `<span class="suggestion-icon">${placeIcon(p)}</span><span class="suggestion-name">${p.name}</span>${p.city ? `<span class="suggestion-city">${p.city}</span>` : ''}${removable ? '<button class="suggestion-remove" title="Remove">✕</button>' : ''}`;
+  return row;
 }
 
 function showSuggestions(field, points) {
@@ -696,34 +780,104 @@ function showSuggestions(field, points) {
     suggestBox.innerHTML = '<div class="planner-empty">No matches — try a different spelling</div>';
   } else {
     points.forEach(p => {
-      const row = document.createElement('div');
-      row.className = 'suggestion';
-      row.innerHTML = `<span class="suggestion-icon">${placeIcon(p)}</span><span class="suggestion-name">${p.name}</span>${p.city ? `<span class="suggestion-city">${p.city}</span>` : ''}`;
+      const row = suggestionRow(p);
       row.addEventListener('click', () => selectPlace(field, p));
       suggestBox.appendChild(row);
     });
   }
-  // Position the dropdown under whichever field is being edited.
-  const fieldEl = field === 'from' ? fromInput.closest('.planner-field') : toInput.closest('.planner-field');
-  suggestBox.style.top = `${fieldEl.offsetTop + fieldEl.offsetHeight + 6}px`;
-  suggestBox.classList.add('visible');
-  plannerState.activeField = field;
+  positionSuggestions(field);
+}
+
+// Shown when a field is focused while still empty: quick shortcuts plus
+// whatever the user has searched for recently.
+function showFieldShortcuts(field) {
+  suggestBox.innerHTML = '';
+  const recents = loadRecents();
+  if (field === 'from') {
+    const home = suggestionRow({ ...HOME_STOP, type: '' });
+    home.querySelector('.suggestion-icon').textContent = '🏠';
+    home.addEventListener('click', () => selectPlace('from', HOME_STOP));
+    suggestBox.appendChild(home);
+
+    const locate = suggestionRow({ name: 'Current location', city: '', type: '' });
+    locate.querySelector('.suggestion-icon').textContent = '📍';
+    locate.addEventListener('click', useCurrentLocation);
+    suggestBox.appendChild(locate);
+  }
+  if (recents.length) {
+    const label = document.createElement('div');
+    label.className = 'suggestion-group';
+    label.textContent = 'Recent';
+    suggestBox.appendChild(label);
+    recents.forEach(p => {
+      const row = suggestionRow(p, { removable: true });
+      row.addEventListener('click', e => {
+        if (e.target.closest('.suggestion-remove')) return;
+        selectPlace(field, p);
+      });
+      row.querySelector('.suggestion-remove').addEventListener('click', () => {
+        removeRecent(p.name);
+        showFieldShortcuts(field);
+      });
+      suggestBox.appendChild(row);
+    });
+  }
+  if (!suggestBox.children.length) {
+    suggestBox.innerHTML = '<div class="planner-empty">Start typing a stop, address, or place…</div>';
+  }
+  positionSuggestions(field);
+}
+
+function updateHasValue(field) {
+  fieldFor(field).classList.toggle('has-value', inputFor(field).value.trim().length > 0);
 }
 
 function selectPlace(field, p) {
   plannerState[field] = p;
-  (field === 'from' ? fromInput : toInput).value = p.name;
+  inputFor(field).value = p.name;
+  updateHasValue(field);
+  saveRecent(p);
   closeSuggestions();
   if (plannerState.from && plannerState.to) findRoutes();
+}
+
+async function useCurrentLocation() {
+  const locateBtn = document.getElementById('planner-locate');
+  if (!navigator.geolocation) {
+    showFieldMessage('from', '⚠ Geolocation isn’t available in this browser');
+    return;
+  }
+  locateBtn.classList.add('loading');
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      locateBtn.classList.remove('loading');
+      const { latitude, longitude } = pos.coords;
+      selectPlace('from', { id: `coord:${longitude}:${latitude}:WGS84`, type: 'loc', city: '', name: '📍 Current location' });
+    },
+    err => {
+      locateBtn.classList.remove('loading');
+      const msg = err.code === err.PERMISSION_DENIED
+        ? 'Location access was denied — allow it in your browser settings'
+        : 'Couldn’t get your location — try again';
+      showFieldMessage('from', `⚠ ${msg}`);
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
+}
+
+function showFieldMessage(field, html) {
+  suggestBox.innerHTML = `<div class="planner-empty">${html}</div>`;
+  positionSuggestions(field);
 }
 
 function wireAutocomplete(input, field) {
   let debounce;
   input.addEventListener('input', () => {
     plannerState[field] = null; // typing invalidates the previous selection
+    updateHasValue(field);
     clearTimeout(debounce);
     const q = input.value.trim();
-    if (q.length < 2) { closeSuggestions(); return; }
+    if (q.length < 2) { q.length === 0 ? showFieldShortcuts(field) : closeSuggestions(); return; }
     debounce = setTimeout(async () => {
       const token = ++searchToken;
       try {
@@ -732,15 +886,31 @@ function wireAutocomplete(input, field) {
         showSuggestions(field, points);
       } catch (e) {
         if (token !== searchToken) return;
-        suggestBox.innerHTML = `<div class="planner-empty">⚠ ${e.message}</div>`;
-        suggestBox.classList.add('visible');
+        showFieldMessage(field, `⚠ ${e.message}`);
       }
     }, 300);
   });
-  input.addEventListener('focus', () => { if (input.value.trim().length >= 2 && !plannerState[field]) input.dispatchEvent(new Event('input')); });
+  input.addEventListener('focus', () => {
+    if (input.value.trim().length >= 2 && !plannerState[field]) input.dispatchEvent(new Event('input'));
+    else if (input.value.trim().length === 0) showFieldShortcuts(field);
+  });
 }
 wireAutocomplete(fromInput, 'from');
 wireAutocomplete(toInput, 'to');
+
+document.getElementById('planner-locate').addEventListener('click', e => { e.stopPropagation(); useCurrentLocation(); });
+
+document.querySelectorAll('.planner-clear').forEach(btn => {
+  btn.addEventListener('click', e => {
+    e.stopPropagation();
+    const field = btn.dataset.field;
+    plannerState[field] = null;
+    inputFor(field).value = '';
+    updateHasValue(field);
+    inputFor(field).focus();
+    showFieldShortcuts(field);
+  });
+});
 
 document.addEventListener('click', e => {
   if (!e.target.closest('.planner-form')) closeSuggestions();
@@ -749,6 +919,8 @@ document.addEventListener('click', e => {
 document.getElementById('planner-swap').addEventListener('click', () => {
   [plannerState.from, plannerState.to] = [plannerState.to, plannerState.from];
   [fromInput.value, toInput.value] = [toInput.value, fromInput.value];
+  updateHasValue('from');
+  updateHasValue('to');
   closeSuggestions();
   if (plannerState.from && plannerState.to) findRoutes();
 });
