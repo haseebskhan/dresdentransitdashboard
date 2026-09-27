@@ -219,22 +219,27 @@ const ROUTE_MAPS = {
 const DVB_URL = 'https://webapi.vvo-online.de/dm';
 
 const PROXY_BUILDERS = [
-  // corsproxy.io: free, supports POST, works from localhost
+  // Direct call — the DVB API sends Access-Control-Allow-Origin: * and allows
+  // Content-Type/Accept, so a plain fetch works from any origin. (A previous
+  // version added an X-Requested-With header here, which DVB's CORS policy
+  // does not allow — that made the browser's preflight fail every time and
+  // broke the whole dashboard.)
+  (url, body, ct) => ({
+    url,
+    opts: { method:'POST', headers:{'Content-Type':ct,'Accept':'application/json'}, body }
+  }),
+  // Corsfix free tier, as a fallback if DVB ever tightens CORS. The target
+  // URL must be appended raw, not encodeURIComponent'd, or corsfix rejects
+  // it as an "invalid_url".
+  (url, body, ct) => ({
+    url: `https://proxy.corsfix.com/?${url}`,
+    opts: { method:'POST', headers:{'Content-Type':ct,'x-corsfix-cors':'true'}, body }
+  }),
+  // corsproxy.io — kept as a last resort; it currently 403s behind Cloudflare
+  // bot protection but may recover.
   (url, body, ct) => ({
     url: `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
     opts: { method:'POST', headers:{'Content-Type':ct}, body }
-  }),
-  // thingproxy: simple GET-wrappable proxy — we encode the full POST as a fetch-over-GET hack
-  // Actually: use a different real POST proxy
-  // Corsfix free tier — supports POST from localhost
-  (url, body, ct) => ({
-    url: `https://proxy.corsfix.com/?${encodeURIComponent(url)}`,
-    opts: { method:'POST', headers:{'Content-Type':ct,'x-corsfix-cors':'true'}, body }
-  }),
-  // Direct call — works if DVB ever adds CORS headers or user is on Pi (same network)
-  (url, body, ct) => ({
-    url,
-    opts: { method:'POST', headers:{'Content-Type':ct,'X-Requested-With':'de.dvb.dvbmobil'}, body }
   }),
 ];
 
