@@ -109,7 +109,7 @@
   @keyframes lineFlow{from{background-position:200% 0;}to{background-position:-200% 0;}}
   @keyframes lineFlowReverse{from{background-position:-200% 0;}to{background-position:200% 0;}}
   .divider{height:1px;background:var(--border);margin:0 0 18px;flex-shrink:0;position:relative;z-index:1;}
-  .status{display:flex;align-items:center;justify-content:space-between;padding-top:14px;border-top:1px solid var(--border);margin-top:auto;flex-shrink:0;position:relative;z-index:1;opacity:0;animation:fadeUp 0.5s 0.35s ease forwards;}
+  .status{display:flex;align-items:center;justify-content:space-between;padding-top:14px;border-top:1px solid var(--border);flex-shrink:0;position:relative;z-index:1;opacity:0;animation:fadeUp 0.5s 0.35s ease forwards;}
   .status-left{display:flex;align-items:center;gap:7px;}
   .pulse{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2.2s infinite;}
   .pulse.loading{background:var(--amber);animation:pulse 1s infinite;}
@@ -119,6 +119,59 @@
   @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
   @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.35;transform:scale(0.75);}}
   @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* ── App tabs ─────────────────────────────────────────────────── */
+  .page{display:none;flex-direction:column;flex:1;}
+  .page.active{display:flex;}
+  .tabbar{display:flex;gap:4px;margin-top:auto;padding-top:12px;border-top:1px solid var(--border);flex-shrink:0;position:relative;z-index:1;}
+  .tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;color:var(--text-dim);font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;letter-spacing:0.03em;padding:6px 4px 2px;cursor:pointer;border-radius:10px;transition:color 0.15s,background 0.15s;}
+  .tab-btn .tab-icon{font-size:17px;line-height:1;}
+  .tab-btn:hover{background:var(--surface);}
+  .tab-btn.active{color:var(--tram);}
+
+  /* ── Route planner ────────────────────────────────────────────── */
+  .planner-title{font-size:26px;font-weight:300;letter-spacing:-0.02em;margin-bottom:18px;flex-shrink:0;}
+  .planner-form{position:relative;flex-shrink:0;margin-bottom:6px;}
+  .planner-fields{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:4px;}
+  .planner-field{display:flex;align-items:center;gap:10px;padding:11px 12px;position:relative;}
+  .planner-field+.planner-field{border-top:1px solid var(--border);}
+  .planner-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .planner-dot.origin{background:var(--tram);}
+  .planner-dot.dest{background:var(--red);border-radius:2px;}
+  .planner-field input{flex:1;min-width:0;background:none;border:none;outline:none;color:var(--text-primary);font-family:'DM Sans',sans-serif;font-size:14px;}
+  .planner-field input::placeholder{color:var(--text-dim);}
+  .planner-swap{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:30px;height:30px;border-radius:9px;background:var(--surface-hover);border:1px solid var(--border-bright);color:var(--text-secondary);font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;}
+  .planner-suggestions{position:absolute;left:0;right:0;top:calc(100% + 6px);background:#15151d;border:1px solid var(--border-bright);border-radius:12px;padding:6px;z-index:20;max-height:240px;overflow-y:auto;box-shadow:0 12px 32px rgba(0,0,0,0.4);display:none;}
+  .planner-suggestions.visible{display:block;}
+  .suggestion{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;cursor:pointer;font-size:13px;}
+  .suggestion:hover,.suggestion.active{background:var(--surface-hover);}
+  .suggestion-icon{font-size:13px;flex-shrink:0;width:16px;text-align:center;color:var(--text-dim);}
+  .suggestion-name{color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .suggestion-city{color:var(--text-dim);font-size:11px;margin-left:auto;padding-left:8px;flex-shrink:0;}
+  .planner-empty{font-size:11px;color:var(--text-dim);padding:10px 4px;}
+  .planner-results{margin-top:16px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;}
+  .route-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;cursor:pointer;transition:background 0.18s,border-color 0.18s;}
+  .route-card:hover{background:var(--surface-hover);border-color:var(--border-bright);}
+  .route-top{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px;}
+  .route-duration{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;letter-spacing:-0.02em;}
+  .route-times{font-size:11px;color:var(--text-secondary);font-family:'DM Mono',monospace;}
+  .route-legs{display:flex;align-items:center;flex-wrap:wrap;gap:5px;}
+  .leg-badge{display:flex;align-items:center;gap:5px;font-family:'DM Mono',monospace;font-size:11px;font-weight:500;padding:4px 8px;border-radius:7px;}
+  .leg-badge.tram{background:rgba(79,142,247,0.11);color:var(--tram);border:1px solid rgba(79,142,247,0.2);}
+  .leg-badge.bus{background:rgba(167,139,250,0.11);color:var(--bus);border:1px solid rgba(167,139,250,0.2);}
+  .leg-badge.sbahn{background:rgba(46,204,113,0.11);color:var(--green);border:1px solid rgba(46,204,113,0.2);}
+  .leg-badge.train{background:rgba(255,150,64,0.11);color:var(--orange);border:1px solid rgba(255,150,64,0.2);}
+  .leg-walk{font-size:11px;color:var(--text-dim);display:flex;align-items:center;gap:4px;}
+  .leg-arrow{color:var(--text-dim);font-size:10px;}
+  .route-meta{font-size:10px;color:var(--text-dim);margin-top:8px;}
+  .route-detail{margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:10px;}
+  .detail-leg-head{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-primary);margin-bottom:6px;}
+  .detail-stop{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--text-secondary);padding:3px 0 3px 20px;position:relative;}
+  .detail-stop::before{content:'';position:absolute;left:3px;top:50%;width:5px;height:5px;border-radius:50%;background:var(--border-bright);transform:translateY(-50%);}
+  .detail-stop.endpoint{color:var(--text-primary);font-weight:500;}
+  .detail-stop.endpoint::before{background:var(--tram);}
+  .detail-clock{font-family:'DM Mono',monospace;}
+  .detail-walk{font-size:11px;color:var(--text-dim);padding-left:20px;display:flex;align-items:center;gap:5px;}
 </style>
 </head>
 <body>
@@ -126,60 +179,86 @@
 <div class="ptr-indicator" id="ptr-indicator"><div class="ptr-spinner"></div></div>
 <div class="screen" id="screen">
 
-  <!-- One-time setup notice -->
-  <div class="setup-notice" id="setup-notice">
-    <h3>⚡ One-time setup for live data</h3>
-    <p>Open Terminal, navigate to the folder with this file, and run:</p>
-    <p><code>python3 -m http.server 8080</code></p>
-    <p>Then open <code>http://localhost:8080/transit-dashboard-live.html</code> in Chrome.</p>
-    <p>This takes 10 seconds and makes live DVB data work permanently.</p>
-    <span class="dismiss" onclick="dismissSetup()">Got it, dismiss this</span>
+  <div id="page-departures" class="page active">
+    <!-- One-time setup notice -->
+    <div class="setup-notice" id="setup-notice">
+      <h3>⚡ One-time setup for live data</h3>
+      <p>Open Terminal, navigate to the folder with this file, and run:</p>
+      <p><code>python3 -m http.server 8080</code></p>
+      <p>Then open <code>http://localhost:8080/transit-dashboard-live.html</code> in Chrome.</p>
+      <p>This takes 10 seconds and makes live DVB data work permanently.</p>
+      <span class="dismiss" onclick="dismissSetup()">Got it, dismiss this</span>
+    </div>
+
+    <div class="header">
+      <div class="header-left">
+        <div class="eyebrow-row">
+          <div class="eyebrow">Dresden · <span id="hard-refresh" style="cursor:pointer;">DVB</span> · Live</div>
+          <div class="pulse loading" id="pulse-dot-top"></div>
+        </div>
+        <div class="title">Live Departures</div>
+      </div>
+      <div class="header-right">
+        <div class="clock" id="clock">--:--:--</div>
+        <div class="date-line" id="date"></div>
+      </div>
+    </div>
+    <div class="banner" id="banner"><span>🌙</span><span id="banner-text"></span></div>
+    <div class="stop-section">
+      <div class="stop-header"><div class="stop-pip"></div><div class="stop-name">Weißeritzstraße</div><div class="stop-walk">~3 min · front door</div></div>
+      <div class="group-label">Towards town</div>
+      <div class="cards" id="stop-weiseritz-town"><div class="loading-card"><div class="spinner"></div>Fetching live data…</div></div>
+      <div class="group-label">Towards Ikea</div>
+      <div class="cards" id="stop-weiseritz-ikea"><div class="loading-card"><div class="spinner"></div>Fetching live data…</div></div>
+    </div>
+    <div class="divider"></div>
+    <div class="stop-section">
+      <div class="stop-header"><div class="stop-pip"></div><div class="stop-name">Kongresszentrum</div><div class="stop-dir">towards Tukwila</div><div class="stop-walk">~7 min walk</div></div>
+      <div class="cards" id="stop-kongress"><div class="loading-card"><div class="spinner"></div>Fetching live data…</div></div>
+    </div>
+    <div class="divider"></div>
+    <div class="stop-section">
+      <div class="stop-header"><div class="stop-pip"></div><div class="stop-name">Bahnhof Mitte</div><div class="stop-dir">towards Postplatz</div><div class="stop-walk">~6 min walk</div></div>
+      <div class="cards" id="stop-mitte"><div class="loading-card"><div class="spinner"></div>Fetching live data…</div></div>
+    </div>
+    <div class="divider"></div>
+    <div class="stop-section">
+      <div class="stop-header"><div class="stop-pip"></div><div class="stop-name">Bahnhof Mitte</div><div class="stop-dir">towards Rahim Kita</div><div class="stop-walk">~6 min walk</div></div>
+      <div class="cards" id="stop-cottaer"><div class="loading-card"><div class="spinner"></div>Fetching live data…</div></div>
+    </div>
+    <div class="divider"></div>
+    <div class="stop-section">
+      <div class="stop-header"><div class="stop-pip"></div><div class="stop-name">Bahnhof Mitte</div><div class="stop-dir">towards Fitx</div><div class="stop-walk">~6 min walk</div></div>
+      <div class="cards" id="stop-freiberger"><div class="loading-card"><div class="spinner"></div>Fetching live data…</div></div>
+    </div>
+    <div class="status">
+      <div class="status-left"><div class="pulse loading" id="pulse-dot"></div><div class="status-text" id="status-text">Connecting to DVB…</div></div>
+      <div class="status-time" id="updated">--:--</div>
+    </div>
   </div>
 
-  <div class="header">
-    <div class="header-left">
-      <div class="eyebrow-row">
-        <div class="eyebrow">Dresden · <span id="hard-refresh" style="cursor:pointer;">DVB</span> · Live</div>
-        <div class="pulse loading" id="pulse-dot-top"></div>
+  <div id="page-planner" class="page">
+    <div class="planner-title">Route Planner</div>
+    <div class="planner-form">
+      <div class="planner-fields">
+        <div class="planner-field">
+          <div class="planner-dot origin"></div>
+          <input id="planner-from" type="text" placeholder="From — e.g. Weißeritzstraße" autocomplete="off">
+        </div>
+        <div class="planner-field">
+          <div class="planner-dot dest"></div>
+          <input id="planner-to" type="text" placeholder="To — any stop or address in Dresden" autocomplete="off">
+        </div>
       </div>
-      <div class="title">Live Departures</div>
+      <div class="planner-suggestions" id="planner-suggestions"></div>
+      <button class="planner-swap" id="planner-swap" title="Swap">⇅</button>
     </div>
-    <div class="header-right">
-      <div class="clock" id="clock">--:--:--</div>
-      <div class="date-line" id="date"></div>
-    </div>
+    <div class="planner-results" id="planner-results"></div>
   </div>
-  <div class="banner" id="banner"><span>🌙</span><span id="banner-text"></span></div>
-  <div class="stop-section">
-    <div class="stop-header"><div class="stop-pip"></div><div class="stop-name">Weißeritzstraße</div><div class="stop-walk">~3 min · front door</div></div>
-    <div class="group-label">Towards town</div>
-    <div class="cards" id="stop-weiseritz-town"><div class="loading-card"><div class="spinner"></div>Fetching live data…</div></div>
-    <div class="group-label">Towards Ikea</div>
-    <div class="cards" id="stop-weiseritz-ikea"><div class="loading-card"><div class="spinner"></div>Fetching live data…</div></div>
-  </div>
-  <div class="divider"></div>
-  <div class="stop-section">
-    <div class="stop-header"><div class="stop-pip"></div><div class="stop-name">Kongresszentrum</div><div class="stop-dir">towards Tukwila</div><div class="stop-walk">~7 min walk</div></div>
-    <div class="cards" id="stop-kongress"><div class="loading-card"><div class="spinner"></div>Fetching live data…</div></div>
-  </div>
-  <div class="divider"></div>
-  <div class="stop-section">
-    <div class="stop-header"><div class="stop-pip"></div><div class="stop-name">Bahnhof Mitte</div><div class="stop-dir">towards Postplatz</div><div class="stop-walk">~6 min walk</div></div>
-    <div class="cards" id="stop-mitte"><div class="loading-card"><div class="spinner"></div>Fetching live data…</div></div>
-  </div>
-  <div class="divider"></div>
-  <div class="stop-section">
-    <div class="stop-header"><div class="stop-pip"></div><div class="stop-name">Bahnhof Mitte</div><div class="stop-dir">towards Rahim Kita</div><div class="stop-walk">~6 min walk</div></div>
-    <div class="cards" id="stop-cottaer"><div class="loading-card"><div class="spinner"></div>Fetching live data…</div></div>
-  </div>
-  <div class="divider"></div>
-  <div class="stop-section">
-    <div class="stop-header"><div class="stop-pip"></div><div class="stop-name">Bahnhof Mitte</div><div class="stop-dir">towards Fitx</div><div class="stop-walk">~6 min walk</div></div>
-    <div class="cards" id="stop-freiberger"><div class="loading-card"><div class="spinner"></div>Fetching live data…</div></div>
-  </div>
-  <div class="status">
-    <div class="status-left"><div class="pulse loading" id="pulse-dot"></div><div class="status-text" id="status-text">Connecting to DVB…</div></div>
-    <div class="status-time" id="updated">--:--</div>
+
+  <div class="tabbar">
+    <button class="tab-btn active" data-tab="departures"><span class="tab-icon">🚋</span>Departures</button>
+    <button class="tab-btn" data-tab="planner"><span class="tab-icon">🔍</span>Route Planner</button>
   </div>
 </div>
 
@@ -560,6 +639,223 @@ async function findStop() {
     results.textContent = JSON.stringify(points, null, 2);
   } catch (e) {
     results.textContent = 'Error: ' + e.message;
+  }
+}
+
+// ── App tabs ─────────────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b === btn));
+    document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === `page-${btn.dataset.tab}`));
+    fitScreen();
+  });
+});
+
+// ── Route planner ────────────────────────────────────────────────
+// Uses the same VVO endpoint family as live departures — pointfinder for
+// place search (stops, addresses, POIs), trips for journey planning.
+// Both send Access-Control-Allow-Origin: * so no proxy is needed here either.
+const POINTFINDER_URL = 'https://webapi.vvo-online.de/tr/pointfinder';
+const TRIPS_URL = 'https://webapi.vvo-online.de/tr/trips';
+
+function parsePoint(raw) {
+  const parts = raw.split('|');
+  const [id, type, city, name] = parts;
+  return { id, type, city, name: name || city || id };
+}
+
+async function searchPlaces(query) {
+  const url = `${POINTFINDER_URL}?format=json&stopsOnly=false&limit=8&query=${encodeURIComponent(query)}`;
+  const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+  if (!res.ok) throw new Error(`Search failed (${res.status})`);
+  const data = await res.json();
+  return (data.Points || []).map(parsePoint).filter(p => p.name);
+}
+
+function placeIcon(p) {
+  if (p.type === 'p') return '📍';
+  if (p.type === 'a') return '🛣';
+  return '🚏';
+}
+
+const plannerState = { from: null, to: null, activeField: null };
+const fromInput = document.getElementById('planner-from');
+const toInput = document.getElementById('planner-to');
+const suggestBox = document.getElementById('planner-suggestions');
+let searchToken = 0;
+
+function closeSuggestions() {
+  suggestBox.classList.remove('visible');
+  suggestBox.innerHTML = '';
+  plannerState.activeField = null;
+}
+
+function showSuggestions(field, points) {
+  suggestBox.innerHTML = '';
+  if (!points.length) {
+    suggestBox.innerHTML = '<div class="planner-empty">No matches — try a different spelling</div>';
+  } else {
+    points.forEach(p => {
+      const row = document.createElement('div');
+      row.className = 'suggestion';
+      row.innerHTML = `<span class="suggestion-icon">${placeIcon(p)}</span><span class="suggestion-name">${p.name}</span>${p.city ? `<span class="suggestion-city">${p.city}</span>` : ''}`;
+      row.addEventListener('click', () => selectPlace(field, p));
+      suggestBox.appendChild(row);
+    });
+  }
+  // Position the dropdown under whichever field is being edited.
+  const fieldEl = field === 'from' ? fromInput.closest('.planner-field') : toInput.closest('.planner-field');
+  suggestBox.style.top = `${fieldEl.offsetTop + fieldEl.offsetHeight + 6}px`;
+  suggestBox.classList.add('visible');
+  plannerState.activeField = field;
+}
+
+function selectPlace(field, p) {
+  plannerState[field] = p;
+  (field === 'from' ? fromInput : toInput).value = p.name;
+  closeSuggestions();
+  if (plannerState.from && plannerState.to) findRoutes();
+}
+
+function wireAutocomplete(input, field) {
+  let debounce;
+  input.addEventListener('input', () => {
+    plannerState[field] = null; // typing invalidates the previous selection
+    clearTimeout(debounce);
+    const q = input.value.trim();
+    if (q.length < 2) { closeSuggestions(); return; }
+    debounce = setTimeout(async () => {
+      const token = ++searchToken;
+      try {
+        const points = await searchPlaces(q);
+        if (token !== searchToken) return; // a newer keystroke superseded this search
+        showSuggestions(field, points);
+      } catch (e) {
+        if (token !== searchToken) return;
+        suggestBox.innerHTML = `<div class="planner-empty">⚠ ${e.message}</div>`;
+        suggestBox.classList.add('visible');
+      }
+    }, 300);
+  });
+  input.addEventListener('focus', () => { if (input.value.trim().length >= 2 && !plannerState[field]) input.dispatchEvent(new Event('input')); });
+}
+wireAutocomplete(fromInput, 'from');
+wireAutocomplete(toInput, 'to');
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.planner-form')) closeSuggestions();
+});
+
+document.getElementById('planner-swap').addEventListener('click', () => {
+  [plannerState.from, plannerState.to] = [plannerState.to, plannerState.from];
+  [fromInput.value, toInput.value] = [toInput.value, fromInput.value];
+  closeSuggestions();
+  if (plannerState.from && plannerState.to) findRoutes();
+});
+
+function parseDvbDate(s) {
+  const m = s && s.match(/\/Date\((\d+)/);
+  return m ? new Date(parseInt(m[1])) : null;
+}
+function fmtClock(d) { return d ? d.toLocaleTimeString('de-DE', { hour:'2-digit', minute:'2-digit' }) : '--:--'; }
+
+function legType(mot) {
+  if (mot.Type === 'Tram') return 'tram';
+  if (mot.Type === 'SuburbanRailway' || mot.Type === 'RapidTransit') return 'sbahn';
+  if (mot.Type === 'Train' || mot.Type === 'RegionalBus') return 'train';
+  return 'bus';
+}
+
+function renderRouteDetail(route) {
+  return route.PartialRoutes
+    // Legs like "MobilityStairsDown"/"MobilityElevator" are accessibility
+    // annotations with no duration or stops — skip them, they're not a
+    // real segment of the trip.
+    .filter(pr => pr.Mot.Type !== undefined && !pr.Mot.Type.startsWith('Mobility'))
+    .map(pr => {
+    if (pr.Mot.Type === 'Footpath' || !pr.Mot.Name) {
+      const from = pr.RegularStops?.[0]?.Name;
+      const to = pr.RegularStops?.[pr.RegularStops.length - 1]?.Name;
+      const label = from && to && from !== to ? `Walk ~${pr.Duration} min to ${to}` : `Walk ~${pr.Duration} min`;
+      return `<div class="detail-walk">🚶 ${label}</div>`;
+    }
+    const stops = pr.RegularStops || [];
+    const rows = stops.map((s, i) => {
+      const isEnd = i === 0 || i === stops.length - 1;
+      const t = parseDvbDate(s.DepartureTime || s.ArrivalTime);
+      return `<div class="detail-stop${isEnd ? ' endpoint' : ''}"><span>${s.Name}${s.Platform ? ` · Steig ${s.Platform.Name}` : ''}</span><span class="detail-clock">${fmtClock(t)}</span></div>`;
+    }).join('');
+    return `<div>
+      <div class="detail-leg-head"><span class="leg-badge ${legType(pr.Mot)}">${pr.Mot.Name}</span> towards ${pr.Mot.Direction}</div>
+      ${rows}
+    </div>`;
+  }).join('');
+}
+
+function renderRouteCard(route) {
+  const legsHtml = route.MotChain.map((mot, i) => {
+    const sep = i > 0 ? '<span class="leg-arrow">›</span>' : '';
+    if (mot.Type === 'Footpath' || !mot.Name) return `${sep}<span class="leg-walk">🚶</span>`;
+    return `${sep}<span class="leg-badge ${legType(mot)}">${mot.Name}</span>`;
+  }).join('');
+
+  const firstStops = route.PartialRoutes[0]?.RegularStops;
+  const lastStops = route.PartialRoutes[route.PartialRoutes.length - 1]?.RegularStops;
+  const depart = firstStops?.length ? parseDvbDate(firstStops[0].DepartureTime) : null;
+  const arrive = lastStops?.length ? parseDvbDate(lastStops[lastStops.length - 1].ArrivalTime) : null;
+  const changeLabel = route.Interchanges === 0 ? 'Direct' : `${route.Interchanges} ${route.Interchanges === 1 ? 'change' : 'changes'}`;
+
+  const card = document.createElement('div');
+  card.className = 'route-card';
+  card.innerHTML = `
+    <div class="route-top">
+      <div class="route-duration">${route.Duration} min</div>
+      <div class="route-times">${fmtClock(depart)} → ${fmtClock(arrive)}</div>
+    </div>
+    <div class="route-legs">${legsHtml}</div>
+    <div class="route-meta">${changeLabel}${route.Price ? ` · ${route.Price} €` : ''}</div>`;
+
+  card.addEventListener('click', () => {
+    const existing = card.querySelector('.route-detail');
+    if (existing) { existing.remove(); return; }
+    document.querySelectorAll('.route-detail').forEach(e => e.remove());
+    const detail = document.createElement('div');
+    detail.className = 'route-detail';
+    detail.innerHTML = renderRouteDetail(route);
+    card.appendChild(detail);
+  });
+  return card;
+}
+
+async function findRoutes() {
+  const results = document.getElementById('planner-results');
+  if (!plannerState.from || !plannerState.to) return;
+  results.innerHTML = '<div class="loading-card"><div class="spinner"></div>Finding routes…</div>';
+  try {
+    const res = await fetch(TRIPS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      body: JSON.stringify({
+        origin: plannerState.from.id,
+        destination: plannerState.to.id,
+        time: new Date().toISOString().split('.')[0],
+        isarrivaltime: false,
+        shorttermchanges: true,
+        mobilitySettings: {},
+        standardSettings: {}
+      }),
+      signal: AbortSignal.timeout(10000)
+    });
+    if (!res.ok) throw new Error(`Trip search failed (${res.status})`);
+    const data = await res.json();
+    if (data.Status?.Code !== 'Ok' || !data.Routes?.length) {
+      results.innerHTML = `<div class="loading-card">No routes found${data.Status?.Message ? ` — ${data.Status.Message}` : ''}</div>`;
+      return;
+    }
+    results.innerHTML = '';
+    data.Routes.slice(0, 6).forEach(route => results.appendChild(renderRouteCard(route)));
+  } catch (e) {
+    results.innerHTML = `<div class="loading-card">⚠ ${e.message}</div>`;
   }
 }
 
