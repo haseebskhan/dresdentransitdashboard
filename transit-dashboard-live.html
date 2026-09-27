@@ -13,6 +13,7 @@
     --tram:#4f8ef7;--bus:#a78bfa;--green:#2ecc71;--orange:#ff9640;--red:#ff4f4f;--yellow:#ffd03a;--amber:#ffb830;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
+  .icon{width:1em;height:1em;display:inline-block;vertical-align:-0.15em;flex-shrink:0;}
   html,body{width:100%;min-height:100vh;background:var(--bg);color:var(--text-primary);font-family:'DM Sans',sans-serif;}
   .screen{width:min(100vw,calc(100vh * 9/16));min-height:100vh;margin:0 auto;padding:32px 26px 26px;display:flex;flex-direction:column;position:relative;}
 
@@ -38,7 +39,7 @@
 
   /* Setup banner */
   .setup-notice{background:rgba(79,142,247,0.08);border:1px solid rgba(79,142,247,0.2);border-radius:12px;padding:14px 16px;margin-bottom:20px;position:relative;z-index:1;opacity:0;animation:fadeUp 0.5s ease forwards;}
-  .setup-notice h3{font-size:12px;font-weight:600;color:var(--tram);margin-bottom:8px;letter-spacing:0.05em;}
+  .setup-notice h3{font-size:12px;font-weight:600;color:var(--tram);margin-bottom:8px;letter-spacing:0.05em;display:flex;align-items:center;gap:6px;}
   .setup-notice p{font-size:11px;color:var(--text-secondary);line-height:1.6;margin-bottom:6px;}
   .setup-notice code{font-family:'DM Mono',monospace;font-size:11px;background:rgba(79,142,247,0.1);border:1px solid rgba(79,142,247,0.2);color:var(--tram);border-radius:4px;padding:2px 6px;}
   .setup-notice .dismiss{font-size:10px;color:var(--text-dim);cursor:pointer;margin-top:6px;display:inline-block;text-decoration:underline;}
@@ -148,14 +149,16 @@
   .planner-swap{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:30px;height:30px;border-radius:9px;background:var(--surface-hover);border:1px solid var(--border-bright);color:var(--text-secondary);font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;}
   .planner-suggestions{position:absolute;left:0;right:0;top:calc(100% + 6px);background:#15151d;border:1px solid var(--border-bright);border-radius:12px;padding:6px;z-index:20;max-height:280px;overflow-y:auto;box-shadow:0 12px 32px rgba(0,0,0,0.4);display:none;}
   .planner-suggestions.visible{display:block;}
-  .suggestion{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;cursor:pointer;font-size:13px;}
+  .suggestion{display:flex;align-items:center;gap:12px;padding:9px 10px;border-radius:8px;cursor:pointer;}
   .suggestion:hover,.suggestion.active{background:var(--surface-hover);}
-  .suggestion-icon{font-size:13px;flex-shrink:0;width:16px;text-align:center;color:var(--text-dim);}
-  .suggestion-name{color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .suggestion-city{color:var(--text-dim);font-size:11px;margin-left:auto;padding-left:8px;flex-shrink:0;}
+  .suggestion-icon{font-size:15px;flex-shrink:0;width:30px;height:30px;border-radius:50%;background:var(--surface-hover);display:flex;align-items:center;justify-content:center;color:var(--text-secondary);}
+  .suggestion-text{min-width:0;flex:1;}
+  .suggestion-name{font-size:13px;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .suggestion-name b{font-weight:700;}
+  .suggestion-sub{font-size:11px;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
   .suggestion-group{font-size:9px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-dim);padding:8px 10px 4px;}
   .suggestion-group:first-child{padding-top:4px;}
-  .suggestion-remove{flex-shrink:0;width:20px;height:20px;border-radius:50%;background:none;border:none;color:var(--text-dim);font-size:11px;display:flex;align-items:center;justify-content:center;}
+  .suggestion-remove{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:none;border:none;color:var(--text-dim);display:flex;align-items:center;justify-content:center;}
   .suggestion-remove:hover{background:var(--surface);color:var(--text-primary);}
   .planner-empty{font-size:11px;color:var(--text-dim);padding:10px 4px;}
   .planner-results{margin-top:16px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;}
@@ -191,7 +194,7 @@
   <div id="page-departures" class="page active">
     <!-- One-time setup notice -->
     <div class="setup-notice" id="setup-notice">
-      <h3>⚡ One-time setup for live data</h3>
+      <h3><span data-icon="zap"></span>One-time setup for live data</h3>
       <p>Open Terminal, navigate to the folder with this file, and run:</p>
       <p><code>python3 -m http.server 8080</code></p>
       <p>Then open <code>http://localhost:8080/transit-dashboard-live.html</code> in Chrome.</p>
@@ -212,7 +215,7 @@
         <div class="date-line" id="date"></div>
       </div>
     </div>
-    <div class="banner" id="banner"><span>🌙</span><span id="banner-text"></span></div>
+    <div class="banner" id="banner"><span data-icon="moon"></span><span id="banner-text"></span></div>
     <div class="stop-section">
       <div class="stop-header"><div class="stop-pip"></div><div class="stop-name">Weißeritzstraße</div><div class="stop-walk">~3 min · front door</div></div>
       <div class="group-label">Towards town</div>
@@ -253,24 +256,24 @@
         <div class="planner-field" id="planner-field-from">
           <div class="planner-dot origin"></div>
           <input id="planner-from" type="text" placeholder="From — e.g. Weißeritzstraße" autocomplete="off">
-          <button class="planner-locate" id="planner-locate" title="Use current location">📍</button>
-          <button class="planner-clear" data-field="from" title="Clear">✕</button>
+          <button class="planner-locate" id="planner-locate" title="Use current location"><span data-icon="locate-fixed"></span></button>
+          <button class="planner-clear" data-field="from" title="Clear"><span data-icon="x"></span></button>
         </div>
         <div class="planner-field" id="planner-field-to">
           <div class="planner-dot dest"></div>
           <input id="planner-to" type="text" placeholder="To — any stop or address in Dresden" autocomplete="off">
-          <button class="planner-clear" data-field="to" title="Clear">✕</button>
+          <button class="planner-clear" data-field="to" title="Clear"><span data-icon="x"></span></button>
         </div>
       </div>
       <div class="planner-suggestions" id="planner-suggestions"></div>
-      <button class="planner-swap" id="planner-swap" title="Swap">⇅</button>
+      <button class="planner-swap" id="planner-swap" title="Swap"><span data-icon="arrow-up-down"></span></button>
     </div>
     <div class="planner-results" id="planner-results"></div>
   </div>
 
   <div class="tabbar">
-    <button class="tab-btn active" data-tab="departures"><span class="tab-icon">🚋</span>Departures</button>
-    <button class="tab-btn" data-tab="planner"><span class="tab-icon">🔍</span>Route Planner</button>
+    <button class="tab-btn active" data-tab="departures"><span class="tab-icon" data-icon="tram-front"></span>Departures</button>
+    <button class="tab-btn" data-tab="planner"><span class="tab-icon" data-icon="route"></span>Route Planner</button>
   </div>
 </div>
 
@@ -283,6 +286,32 @@
 </div>
 
 <script>
+// ── Icons (Lucide, inlined as SVG — no emoji anywhere in the UI) ──
+const ICONS = {
+  'map-pin': '<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>',
+  'search': '<path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/>',
+  'home': '<path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+  'history': '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
+  'bus': '<path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><path d="M9 18h5"/><circle cx="16" cy="18" r="2"/>',
+  'train-front': '<path d="M8 3.1V7a4 4 0 0 0 8 0V3.1"/><path d="m9 15-1-1"/><path d="m15 15 1-1"/><path d="M9 19c-2.8 0-5-2.2-5-5v-4a8 8 0 0 1 16 0v4c0 2.8-2.2 5-5 5Z"/><path d="m8 19-2 3"/><path d="m16 19 2 3"/>',
+  'tram-front': '<rect width="16" height="16" x="4" y="3" rx="2"/><path d="M4 11h16"/><path d="M12 3v8"/><path d="m8 19-2 3"/><path d="m18 22-2-3"/><path d="M8 15h.01"/><path d="M16 15h.01"/>',
+  'footprints': '<path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z"/><path d="M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z"/><path d="M16 17h4"/><path d="M4 13h4"/>',
+  'x': '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  'arrow-up-down': '<path d="m21 16-4 4-4-4"/><path d="M17 20V4"/><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/>',
+  'triangle-alert': '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+  'route': '<circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/>',
+  'zap': '<path d="M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z"/>',
+  'check': '<path d="M20 6 9 17l-5-5"/>',
+  'moon': '<path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/>',
+  'locate-fixed': '<line x1="2" x2="5" y1="12" y2="12"/><line x1="19" x2="22" y1="12" y2="12"/><line x1="12" x2="12" y1="2" y2="5"/><line x1="12" x2="12" y1="19" y2="22"/><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3"/>',
+};
+function icon(name, cls = '') {
+  return `<svg class="icon${cls ? ' ' + cls : ''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[name] || ''}</svg>`;
+}
+function renderIcons(root = document) {
+  root.querySelectorAll('[data-icon]').forEach(el => { el.innerHTML = icon(el.dataset.icon, el.dataset.iconClass); });
+}
+
 // ── Stop config (verified IDs from DVB website) ───────────────────
 const STOPS = {
   kongress:   { id: '33000021', lines: ['6','11'],  walk: 7, cid: 'stop-kongress'   },
@@ -447,10 +476,10 @@ function urgency(dep, walk) {
   const b = dep - walk;
   if (dep < 0.4) return { label:'Already gone',               cls:'gone',        col:'red'    };
   if (b < -0.5)  return { label:'Missed it',                  cls:'gone',        col:'red'    };
-  if (b < 0.3)   return { label:'🏃 Run! Last chance',        cls:'run',         col:'red'    };
-  if (b < 1)     return { label:'⚡ Leave this second',       cls:'hurry',       col:'orange' };
-  if (b < 2)     return { label:"👟 Leave now, you'll make it",cls:'now',        col:'yellow' };
-  if (b < 5)     return { label:'✓ Leave soon',               cls:'good',        col:'green'  };
+  if (b < 0.3)   return { label:`${icon('zap')} Run! Last chance`,           cls:'run',         col:'red'    };
+  if (b < 1)     return { label:`${icon('zap')} Leave this second`,          cls:'hurry',       col:'orange' };
+  if (b < 2)     return { label:`${icon('footprints')} Leave now, you'll make it`, cls:'now',    col:'yellow' };
+  if (b < 5)     return { label:`${icon('check')} Leave soon`,               cls:'good',        col:'green'  };
   return                { label:'Plenty of time',             cls:'comfortable', col:'white'  };
 }
 
@@ -479,7 +508,7 @@ function buildMap(line, dest, minsAway) {
         : (i<=tramAt?'passed':i===tramAt+1?'active':'');
       html+=`<div class="map-line ${lc}"></div>`;
     }
-    html+=`<div class="map-stop ${cls}"><div class="map-dot"></div><div class="map-stop-name">${i===yours?'📍 '+s:s}</div></div>`;
+    html+=`<div class="map-stop ${cls}"><div class="map-dot"></div><div class="map-stop-name">${i===yours?icon('map-pin')+' '+s:s}</div></div>`;
   });
   return html+'</div></div>';
 }
@@ -546,7 +575,7 @@ async function fetchAll() {
     anyOk = true;
   } catch(e) {
     ['stop-weiseritz-town','stop-weiseritz-ikea'].forEach(id => {
-      document.getElementById(id).innerHTML = `<div class="loading-card">⚠ ${e.message}</div>`;
+      document.getElementById(id).innerHTML = `<div class="loading-card">${icon('triangle-alert')} ${e.message}</div>`;
     });
   }
 
@@ -560,7 +589,7 @@ async function fetchAll() {
     } catch(e) {
       console.error(cid, e);
       document.getElementById(cid).innerHTML =
-        `<div class="loading-card">⚠ ${e.message} — see setup instructions above</div>`;
+        `<div class="loading-card">${icon('triangle-alert')} ${e.message} — see setup instructions above</div>`;
     }
   }));
 
@@ -724,10 +753,29 @@ async function searchPlaces(query) {
 }
 
 function placeIcon(p) {
-  if (p.type === 'osm') return '🗺';
-  if (p.type === 'p') return '📍';
-  if (p.type === 'a') return '🛣';
-  return '🚏';
+  if (p.type === 'home') return 'home';
+  if (p.type === 'loc') return 'locate-fixed';
+  if (p.type === 'recent') return 'history';
+  return 'map-pin'; // Google Maps uses one plain pin for nearly every place result
+}
+
+function placeSubtitle(p) {
+  if (p.type === 'loc') return 'Use your device’s GPS location';
+  if (p.type === 'home') return 'Your saved home stop';
+  if (p.city) return p.city;
+  if (p.type === '') return 'Transit stop';
+  if (p.type === 'p') return 'Point of interest';
+  if (p.type === 'a') return 'Address';
+  return 'Dresden area';
+}
+
+// Bold the part of the name that matches what was typed, the way Google's
+// autocomplete highlights the matched substring.
+function highlightMatch(name, query) {
+  if (!query) return name;
+  const i = name.toLowerCase().indexOf(query.toLowerCase());
+  if (i === -1) return name;
+  return `${name.slice(0, i)}<b>${name.slice(i, i + query.length)}</b>${name.slice(i + query.length)}`;
 }
 
 function loadRecents() {
@@ -767,20 +815,25 @@ function positionSuggestions(field) {
   plannerState.activeField = field;
 }
 
-function suggestionRow(p, { removable } = {}) {
+function suggestionRow(p, { removable, query } = {}) {
   const row = document.createElement('div');
   row.className = 'suggestion';
-  row.innerHTML = `<span class="suggestion-icon">${placeIcon(p)}</span><span class="suggestion-name">${p.name}</span>${p.city ? `<span class="suggestion-city">${p.city}</span>` : ''}${removable ? '<button class="suggestion-remove" title="Remove">✕</button>' : ''}`;
+  row.innerHTML = `<span class="suggestion-icon">${icon(placeIcon(p))}</span><div class="suggestion-text"><div class="suggestion-name">${highlightMatch(p.name, query)}</div><div class="suggestion-sub">${placeSubtitle(p)}</div></div>${removable ? `<button class="suggestion-remove" title="Remove">${icon('x')}</button>` : ''}`;
   return row;
 }
 
-function showSuggestions(field, points) {
+function highlightActive(rows, idx) {
+  rows.forEach((r, i) => r.classList.toggle('active', i === idx));
+  if (idx >= 0) rows[idx].scrollIntoView({ block: 'nearest' });
+}
+
+function showSuggestions(field, points, query) {
   suggestBox.innerHTML = '';
   if (!points.length) {
     suggestBox.innerHTML = '<div class="planner-empty">No matches — try a different spelling</div>';
   } else {
     points.forEach(p => {
-      const row = suggestionRow(p);
+      const row = suggestionRow(p, { query });
       row.addEventListener('click', () => selectPlace(field, p));
       suggestBox.appendChild(row);
     });
@@ -789,18 +842,17 @@ function showSuggestions(field, points) {
 }
 
 // Shown when a field is focused while still empty: quick shortcuts plus
-// whatever the user has searched for recently.
+// whatever the user has searched for recently — mirrors Google Maps'
+// "Home / recent searches" list under an empty search box.
 function showFieldShortcuts(field) {
   suggestBox.innerHTML = '';
   const recents = loadRecents();
   if (field === 'from') {
-    const home = suggestionRow({ ...HOME_STOP, type: '' });
-    home.querySelector('.suggestion-icon').textContent = '🏠';
+    const home = suggestionRow({ ...HOME_STOP, type: 'home' });
     home.addEventListener('click', () => selectPlace('from', HOME_STOP));
     suggestBox.appendChild(home);
 
-    const locate = suggestionRow({ name: 'Current location', city: '', type: '' });
-    locate.querySelector('.suggestion-icon').textContent = '📍';
+    const locate = suggestionRow({ name: 'Current location', city: '', type: 'loc' });
     locate.addEventListener('click', useCurrentLocation);
     suggestBox.appendChild(locate);
   }
@@ -810,12 +862,13 @@ function showFieldShortcuts(field) {
     label.textContent = 'Recent';
     suggestBox.appendChild(label);
     recents.forEach(p => {
-      const row = suggestionRow(p, { removable: true });
+      const row = suggestionRow({ ...p, type: 'recent' }, { removable: true });
       row.addEventListener('click', e => {
         if (e.target.closest('.suggestion-remove')) return;
         selectPlace(field, p);
       });
-      row.querySelector('.suggestion-remove').addEventListener('click', () => {
+      row.querySelector('.suggestion-remove').addEventListener('click', e => {
+        e.stopPropagation();
         removeRecent(p.name);
         showFieldShortcuts(field);
       });
@@ -844,7 +897,7 @@ function selectPlace(field, p) {
 async function useCurrentLocation() {
   const locateBtn = document.getElementById('planner-locate');
   if (!navigator.geolocation) {
-    showFieldMessage('from', '⚠ Geolocation isn’t available in this browser');
+    showFieldMessage('from', `${icon('triangle-alert')} Geolocation isn’t available in this browser`);
     return;
   }
   locateBtn.classList.add('loading');
@@ -852,14 +905,14 @@ async function useCurrentLocation() {
     pos => {
       locateBtn.classList.remove('loading');
       const { latitude, longitude } = pos.coords;
-      selectPlace('from', { id: `coord:${longitude}:${latitude}:WGS84`, type: 'loc', city: '', name: '📍 Current location' });
+      selectPlace('from', { id: `coord:${longitude}:${latitude}:WGS84`, type: 'loc', city: '', name: 'Current location' });
     },
     err => {
       locateBtn.classList.remove('loading');
       const msg = err.code === err.PERMISSION_DENIED
         ? 'Location access was denied — allow it in your browser settings'
         : 'Couldn’t get your location — try again';
-      showFieldMessage('from', `⚠ ${msg}`);
+      showFieldMessage('from', `${icon('triangle-alert')} ${msg}`);
     },
     { enableHighAccuracy: true, timeout: 10000 }
   );
@@ -883,16 +936,28 @@ function wireAutocomplete(input, field) {
       try {
         const points = await searchPlaces(q);
         if (token !== searchToken) return; // a newer keystroke superseded this search
-        showSuggestions(field, points);
+        showSuggestions(field, points, q);
       } catch (e) {
         if (token !== searchToken) return;
-        showFieldMessage(field, `⚠ ${e.message}`);
+        showFieldMessage(field, `${icon('triangle-alert')} ${e.message}`);
       }
-    }, 300);
+    }, 200);
   });
   input.addEventListener('focus', () => {
     if (input.value.trim().length >= 2 && !plannerState[field]) input.dispatchEvent(new Event('input'));
     else if (input.value.trim().length === 0) showFieldShortcuts(field);
+  });
+  // Arrow keys move through the dropdown, Enter picks the highlighted (or
+  // first) result, Escape closes it — same as Google Maps' search box.
+  input.addEventListener('keydown', e => {
+    if (plannerState.activeField !== field) return;
+    const rows = Array.from(suggestBox.querySelectorAll('.suggestion'));
+    if (!rows.length) return;
+    let idx = rows.findIndex(r => r.classList.contains('active'));
+    if (e.key === 'ArrowDown') { e.preventDefault(); idx = (idx + 1) % rows.length; highlightActive(rows, idx); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); idx = idx <= 0 ? rows.length - 1 : idx - 1; highlightActive(rows, idx); }
+    else if (e.key === 'Enter') { e.preventDefault(); rows[idx >= 0 ? idx : 0].click(); }
+    else if (e.key === 'Escape') { closeSuggestions(); }
   });
 }
 wireAutocomplete(fromInput, 'from');
@@ -949,7 +1014,7 @@ function renderRouteDetail(route) {
       const from = pr.RegularStops?.[0]?.Name;
       const to = pr.RegularStops?.[pr.RegularStops.length - 1]?.Name;
       const label = from && to && from !== to ? `Walk ~${pr.Duration} min to ${to}` : `Walk ~${pr.Duration} min`;
-      return `<div class="detail-walk">🚶 ${label}</div>`;
+      return `<div class="detail-walk">${icon('footprints')} ${label}</div>`;
     }
     const stops = pr.RegularStops || [];
     const rows = stops.map((s, i) => {
@@ -967,7 +1032,7 @@ function renderRouteDetail(route) {
 function renderRouteCard(route) {
   const legsHtml = route.MotChain.map((mot, i) => {
     const sep = i > 0 ? '<span class="leg-arrow">›</span>' : '';
-    if (mot.Type === 'Footpath' || !mot.Name) return `${sep}<span class="leg-walk">🚶</span>`;
+    if (mot.Type === 'Footpath' || !mot.Name) return `${sep}<span class="leg-walk">${icon('footprints')}</span>`;
     return `${sep}<span class="leg-badge ${legType(mot)}">${mot.Name}</span>`;
   }).join('');
 
@@ -1027,10 +1092,11 @@ async function findRoutes() {
     results.innerHTML = '';
     data.Routes.slice(0, 6).forEach(route => results.appendChild(renderRouteCard(route)));
   } catch (e) {
-    results.innerHTML = `<div class="loading-card">⚠ ${e.message}</div>`;
+    results.innerHTML = `<div class="loading-card">${icon('triangle-alert')} ${e.message}</div>`;
   }
 }
 
+renderIcons();
 setInterval(tick, 1000); tick();
 fitScreen();
 fetchAll();
